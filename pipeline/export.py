@@ -5,7 +5,8 @@ Tables: cells, monthly (observations + suitability scores + ESI), annual, trends
 trends_monthly, trends_seasonal, decades, correlations, attribution, national_annual,
 national_monthly, regional_annual, proj_annual, proj_national, proj_national_by_model,
 proj_snapshots, proj_baseline, proj_baseline_monthly, proj_scores (monthly scores of every
-model/scenario/year, for the "your own weights" tool), gbif, athens_weekly.
+model/scenario/year, for the "your own weights" tool), proj_monthly (ensemble median and
+10th–90th percentile of each projected parameter per cell, year and month), gbif, athens_weekly.
 Static: api/static/cells.geojson (cell shapes = Greek land in each cell), meta.json,
 validation.json, calibration.json, sensitivity.json, abundance.json, science_values.json.
 Re-run the whole pipeline (pipeline/run_all.py) when new NASA months are published.
@@ -44,6 +45,7 @@ def main() -> None:
         "proj_annual": "projections_annual.parquet", "proj_national": "projections_national.parquet",
         "proj_national_by_model": "projections_national_by_model.parquet", "proj_snapshots": "projections_snapshots.parquet",
         "proj_baseline_monthly": "projection_baseline_monthly.parquet", "athens_weekly": "athens_weekly.parquet",
+        "proj_monthly": "projections_monthly.parquet",
     }
     for name, f in tables.items():
         con.execute(f"CREATE TABLE {name} AS SELECT * FROM read_parquet('{(PROCESSED / f).as_posix()}')")

@@ -62,7 +62,9 @@ export type Panel = {
   partial_months?: number
   p10?: number | null; p90?: number | null; change?: number | null; n_models?: number | null
   factors?: Record<'sT' | 'sP' | 'sRH' | 'sW' | 'sNDVI', number | null>
+  fields?: Record<string, number | null>
   series: Point[]
+  projection: { year: number; v: number | null; p10: number | null; p90: number | null }[]
   seasonal?: { month: number; early: number | null; late: number | null }[]
   seasonal_periods?: [string, string]
   trend?: { per5: number; sen_decade: number; p: number | null; significant: boolean; first: number; last: number; n: number } | null
@@ -73,7 +75,7 @@ export type National = {
   trends: Record<string, Trend>
   regions: { region: string; esi: number; esi_2001_2010: number | null; change: number | null }[]
   cells_ranked: { cell: string; region: string; lat: number; lon: number; esi: number }[]
-  projections: { scenario: string; year: number; ESI_med: number; ESI_p10: number; ESI_p90: number; ESI_min: number; ESI_max: number; T2M_med: number }[]
+  projections: Record<string, number | string | null>[]   // scenario, year, {VAR}_med, {VAR}_p10, {VAR}_p90
   periods: Record<string, number | null>
   change_2050?: Record<string, { change: number; share_up: number }>
   last_complete_year: number

@@ -68,6 +68,7 @@ _USED = json.loads((ROOT / "data" / "processed" / "esi_parameters_used.json").re
 WEIGHTS = {"ESI": _USED["weights"], "ESI_eq": _USED["equal"]}
 SCENARIO = "ssp245"   # the app shows the intermediate emissions scenario only
 FIRST_YEAR = {"ESI": 2001, "ESI_eq": 2001, "NDVI": 2001}   # others: 1981
+FIELDS = ["T2M", "PRECIP", "RH2M", "WS10M", "NDVI"]
 
 
 def q(sql: str, *args) -> list[dict]:
@@ -170,6 +171,30 @@ def proj_values(layer: str, year: int, month: int, cell: str | None = None) -> l
     return q(sql, *args)
 
 
+def proj_field_values(layer: str, year: int, month: int, cell: str | None = None) -> list[dict]:
+    """Projected parameter per cell (SSP2-4.5): median, 10th and 90th percentile of the 8 models
+    (delta method; NDVI = extension of its 2001–2025 trend). Month 0 = annual mean (rain: total)."""
+    table, extra, args = ("proj_monthly", " AND month = ?", [SCENARIO, year, month]) if month else ("proj_annual", "", [SCENARIO, year])
+    if cell:
+        extra += " AND cell = ?"
+        args.append(cell)
+    return q(f"SELECT cell, {layer}_med v, {layer}_p10 p10, {layer}_p90 p90 FROM {table} WHERE scenario = ? AND year = ?{extra}", *args)
+
+
+def proj_series(layer: str, cell: str, month: int, after: int) -> list[dict]:
+    """Projected series of one cell after the last observed year: per year, median and 10th–90th
+    percentile of the models (one month, or annual values)."""
+    if layer in WEIGHTS:
+        if month:
+            return q(f"""WITH m AS (SELECT year, model, {esi_sql(layer)} e FROM proj_scores WHERE scenario = ? AND cell = ? AND month = ? AND year > ?)
+                         SELECT year, median(e) v, quantile_cont(e, 0.1) p10, quantile_cont(e, 0.9) p90 FROM m GROUP BY year ORDER BY year""",
+                     SCENARIO, cell, month, after)
+        return q(f"SELECT year, {layer}_med v, {layer}_p10 p10, {layer}_p90 p90 FROM proj_annual WHERE scenario = ? AND cell = ? AND year > ? ORDER BY year",
+                 SCENARIO, cell, after)
+    table, extra, args = ("proj_monthly", " AND month = ?", [SCENARIO, cell, month, after]) if month else ("proj_annual", "", [SCENARIO, cell, after])
+    return q(f"SELECT year, {layer}_med v, {layer}_p10 p10, {layer}_p90 p90 FROM {table} WHERE scenario = ? AND cell = ?{extra} AND year > ? ORDER BY year", *args)
+
+
 @lru_cache(maxsize=128)
 def layer_domain(layer: str, month: int) -> tuple:
     """2nd–98th percentile of a layer over all cells and complete years (one month, or annual values),
@@ -202,14 +227,17 @@ def map_layer(layer: str = "ESI", year: int = 2025, month: int = Query(0, ge=0, 
                 "values": {r["cell"]: r["v"] for r in rows}, "domain": layer_domain(layer, month)}
     if scenario != SCENARIO:
         raise HTTPException(400, "only the SSP2-4.5 scenario is offered")
-    if layer not in WEIGHTS:
-        raise HTTPException(400, "projections are offered for the ESI only")
     if year > 2050:
         raise HTTPException(400, "projections end in 2050")
-    rows = proj_values(layer, year, month)
+    if layer in WEIGHTS:
+        rows = proj_values(layer, year, month)
+        return {"kind": "projection", "scenario": SCENARIO, "year": year, "month": month, "layer": layer,
+                "values": {r["cell"]: r["v"] for r in rows},
+                "extra": {r["cell"]: {"p10": r["p10"], "p90": r["p90"], "change": r["change"]} for r in rows}}
+    rows = proj_field_values(layer, year, month)
     return {"kind": "projection", "scenario": SCENARIO, "year": year, "month": month, "layer": layer,
-            "values": {r["cell"]: r["v"] for r in rows},
-            "extra": {r["cell"]: {"p10": r["p10"], "p90": r["p90"], "change": r["change"]} for r in rows}}
+            "values": {r["cell"]: r["v"] for r in rows}, "domain": layer_domain(layer, month),
+            "extra": {r["cell"]: {"p10": r["p10"], "p90": r["p90"]} for r in rows}}
 
 
 # ------------------------------------------------------------------ the region card of the map
@@ -229,24 +257,29 @@ def panel(cell: str, layer: str = "ESI", year: int = 2025, month: int = Query(0,
     is_esi = layer in WEIGHTS
     out: dict = {"cell": c[0], "layer": layer, "year": year, "month": month}
     if year > ly:
-        if not is_esi:
-            raise HTTPException(400, "projections are offered for the ESI only")
         if year > 2050:
             raise HTTPException(400, "projections end in 2050")
-        r = proj_values(layer, year, month, cell)
-        r = r[0] if r else {}
-        out.update(kind="projection", scenario=SCENARIO, value=r.get("v"), p10=r.get("p10"), p90=r.get("p90"),
-                   change=r.get("change"), n_models=r.get("n_models"), factors={s: r.get(s) for s in SCORES})
+        out.update(kind="projection", scenario=SCENARIO, n_models=8)
+        if is_esi:
+            r = proj_values(layer, year, month, cell)
+            r = r[0] if r else {}
+            out.update(value=r.get("v"), p10=r.get("p10"), p90=r.get("p90"), change=r.get("change"), n_models=r.get("n_models"),
+                       factors={s: r.get(s) for s in SCORES},
+                       fields={f: (proj_field_values(f, year, month, cell) or [{}])[0].get("v") for f in FIELDS})
+        else:
+            r = (proj_field_values(layer, year, month, cell) or [{}])[0]
+            out.update(value=r.get("v"), p10=r.get("p10"), p90=r.get("p90"))
     else:
         out["kind"] = "observed"
-        cols = f"{layer} v, " + ", ".join(SCORES)
+        cols = ", ".join(FIELDS) + ", " + ", ".join(SCORES)
         if month:
-            r = q(f"SELECT {cols} FROM monthly WHERE cell = ? AND year = ? AND month = ?", cell, year, month)
+            r = q(f"SELECT {layer} v, {cols} FROM monthly WHERE cell = ? AND year = ? AND month = ?", cell, year, month)
             r = r[0] if r else {}
         else:
             agg = "sum" if layer == "PRECIP" else "avg"
-            r = q(f"SELECT {agg}({layer}) v, count({layer}) n, " + ", ".join(f"avg({s}) {s}" for s in SCORES)
-                  + " FROM monthly WHERE cell = ? AND year = ?", cell, year)[0]
+            r = q(f"SELECT {agg}({layer}) v, count({layer}) n, sum(PRECIP) PRECIP, "
+                  + ", ".join(f"avg({f}) {f}" for f in FIELDS if f != "PRECIP") + ", "
+                  + ", ".join(f"avg({s}) {s}" for s in SCORES) + " FROM monthly WHERE cell = ? AND year = ?", cell, year)[0]
             if year <= lcy:   # complete year: the stored annual value (mean, or total for rain)
                 a = q(f"SELECT {layer} v FROM annual WHERE cell = ? AND year = ?", cell, year)
                 r["v"] = a[0]["v"] if a else None
@@ -255,11 +288,14 @@ def panel(cell: str, layer: str = "ESI", year: int = 2025, month: int = Query(0,
         out["value"] = r.get("v")
         if is_esi:
             out["factors"] = {s: r.get(s) for s in SCORES}
+            out["fields"] = {f: r.get(f) for f in FIELDS}
     first = FIRST_YEAR.get(layer, 1981)   # NDVI and the ESI start in February 2000: whole years from 2001
     if month:
         out["series"] = q(f"SELECT year, {layer} v FROM monthly WHERE cell = ? AND month = ? AND year >= ? AND {layer} IS NOT NULL ORDER BY year", cell, month, first)
     else:
         out["series"] = q(f"SELECT year, {layer} v FROM annual WHERE cell = ? AND complete_year AND year >= ? AND {layer} IS NOT NULL ORDER BY year", cell, first)
+    last_obs = out["series"][-1]["year"] if out["series"] else lcy
+    out["projection"] = proj_series(layer, cell, month, last_obs)
     if is_esi:
         out["seasonal"] = q(f"""SELECT month, avg(CASE WHEN year BETWEEN 2001 AND 2010 THEN {layer} END) early,
                                        avg(CASE WHEN year BETWEEN ? AND ? THEN {layer} END) late

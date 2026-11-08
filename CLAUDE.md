@@ -9,7 +9,12 @@ Live: https://rea-tau-seven.vercel.app. Full method: `README.md` (Greek). Team w
   - Raw data live in `data/raw/`, which is not in git (release `data-2026-11`).
 - `data/tiger.duckdb`: the database built by `export.py`. The API opens it read-only.
 - `api/main.py`: FastAPI. Every number the UI shows comes from here. It also serves `web/dist`. Vercel entry: `api/index.py` plus `vercel.json`.
-  - The map uses `/api/map` (any year and month; ESI projections for 2027–2050 from `proj_scores`, SSP2-4.5) and `/api/panel/{cell}` (the region card).
+  - The map uses `/api/map` (any year and month for every layer; projections for 2027–2050, SSP2-4.5) and `/api/panel/{cell}` (the region card, with observed and projected series).
+  - Projections: the five parameters come from `pipeline/projections.py`:
+    - T, P, RH and W use the CMIP6 delta method;
+    - NDVI uses the extension of its 2001–2025 trend.
+    - The ensemble of each parameter is in `proj_monthly` and `proj_annual`.
+    - The ESI comes from the five parameters with the same formula, per model (`proj_scores`). The app shows the median of the 8 models.
 - `web/`: React 19, TypeScript, Tailwind 4, MapLibre, Recharts. Three sections in `web/src/pages/`:
   - `OverviewPage` (what the ESI is, the five parameters and their weights);
   - `MapPage` with `components/RegionPanel` (one layer, a year slider, a month; one region at a time; state in the URL);

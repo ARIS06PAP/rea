@@ -41,13 +41,12 @@ function VarChart({ v, n, ly }: { v: string; n: National; ly: number }) {
   const t = n.trends[v]
   const obs = n.annual.filter((r) => r[v] != null && (r.year as number) >= info.first && (r.year as number) <= ly).map((r) => ({ year: r.year as number, v: r[v] as number }))
   const rows: Record<string, unknown>[] = t ? trendRows(obs, t.sen_decade, t.first, t.last) : obs
-  if (v === 'ESI') {   // the intermediate scenario only (SSP2-4.5), from the last complete year on
-    for (const p of n.projections.filter((p) => p.scenario === 'ssp245' && p.year >= ly)) {
-      const row = rows.find((r) => r.year === p.year)
-      const add = { s245: p.ESI_med, lo: p.ESI_p10, hi: p.ESI_p90 }
-      if (row) Object.assign(row, add)
-      else rows.push({ year: p.year, ...add })
-    }
+  // every parameter goes on to 2050: the intermediate scenario (SSP2-4.5), from the last complete year on
+  for (const p of n.projections.filter((p) => p.scenario === 'ssp245' && (p.year as number) >= ly)) {
+    const row = rows.find((r) => r.year === p.year)
+    const add = { s245: p[`${v}_med`], lo: p[`${v}_p10`], hi: p[`${v}_p90`] }
+    if (row) Object.assign(row, add)
+    else rows.push({ year: p.year, ...add })
   }
   const sub = t ? (
     <>Ανά 5 χρόνια <b className={`num ${t.significant ? (t.sen_decade > 0 ? 'text-up' : 'text-down') : 'text-fg'}`}>{signed(t.sen_decade / 2, info.digits + 1)}</b>
@@ -59,10 +58,10 @@ function VarChart({ v, n, ly }: { v: string; n: National; ly: number }) {
         series={[
           { key: 'v', name: 'Μετρήσεις', color: v === 'ESI' ? '#fe9f6d' : '#5aa9e6', dot: true, width: 1.5 },
           ...(t ? [{ key: 'trend', name: 'Τάση', color: '#ffcf70', dashed: true, width: 1.4 }] : []),
-          ...(v === 'ESI' ? [{ key: 's245', name: 'Πρόβλεψη SSP2-4.5', color: '#5aa9e6', dashed: true, width: 1.8 }] : []),
+          { key: 's245', name: 'Πρόβλεψη SSP2-4.5', color: v === 'ESI' ? '#5aa9e6' : '#fe9f6d', dashed: true, width: 1.8 },
         ]}
-        bands={v === 'ESI' ? [{ lo: 'lo', hi: 'hi', color: '#5aa9e6', name: 'εύρος μοντέλων' }] : []}
-        refX={v === 'ESI' ? { x: ly, label: 'σήμερα' } : undefined} shadeFrom={v === 'ESI' ? ly : undefined}
+        bands={[{ lo: 'lo', hi: 'hi', color: v === 'ESI' ? '#5aa9e6' : '#fe9f6d', name: 'εύρος μοντέλων' }]}
+        refX={{ x: ly, label: 'σήμερα' }} shadeFrom={ly}
         clampY={v === 'ESI' ? [0, 100] : undefined} height={210} digits={info.digits === 0 ? 1 : info.digits} />
     </Card>
   )

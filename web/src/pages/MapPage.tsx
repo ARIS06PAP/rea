@@ -21,7 +21,7 @@ export default function MapPage() {
   const lcy = meta.data?.last_complete_year ?? 2025
   const layer = LAYER_INFO[sp.get('layer') ?? ''] ? sp.get('layer')! : 'ESI'
   const info = LAYER_INFO[layer]
-  const maxOf = (l: string) => (LAYER_INFO[l].esi ? 2050 : ly)
+  const maxOf = (_l: string) => 2050   // every layer has a projection (SSP2-4.5) after the last data year
   const year = clamp(Number(sp.get('year')) || lcy, info.first, maxOf(layer))
   const monthMax = year === ly ? lm : 12
   const month = clamp(Number(sp.get('month')) || 0, 0, monthMax)
@@ -56,7 +56,7 @@ export default function MapPage() {
     let s = `<b>${nameOf(id)}</b><br/>${info.short}: <b>${nf(v, info.digits)}</b>${unit}`
     if (info.esi) s += ` · ${esiWord(v)}`
     const e = map.data?.extra?.[id]
-    if (future && e) s += `<br/><span style="color:#8591a6">εύρος μοντέλων ${nf(e.p10, 0)}–${nf(e.p90, 0)}</span>`
+    if (future && e) s += `<br/><span style="color:#8591a6">εύρος μοντέλων ${nf(e.p10, info.digits)}–${nf(e.p90, info.digits)}</span>`
     return s
   }
   const when = `${month ? `${MONTHS_LONG[month]} ` : ''}${year}${map.data?.partial ? ` (${MONTHS[1]}–${MONTHS[map.data.months ?? 12]})` : ''}`

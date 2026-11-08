@@ -5,8 +5,14 @@ Delta (change-factor) method, per grid cell, calendar month and model:
 * rain:         P_future = P_obs(1995–2014) × [pr_model(year) / pr_model(1995–2014)]   (ratio capped 0.2–3)
 * humidity:     RH_future = RH_obs(1995–2014) + Δhurs                                   (clipped 1–100 %)
 * wind:         W_future = W_obs(1995–2014) × [sfcWind_model(year) / sfcWind_model(1995–2014)]
-* NDVI:         no MODIS projections exist → held at its 2016–2025 monthly climatology
-                (main case); ±10 % in the sensitivity analysis. No NDVI value is invented.
+* NDVI:         no climate model projects it, so its observed Sen trend (MODIS 2001–2025, per
+                cell and month) is extended from the 2016–2025 monthly climatology (centred on
+                2020.5), clipped to 0.05–0.95. A statistical extension, labelled as such; ±10 % in
+                the sensitivity analysis.
+The ESI of every model, month and year is then computed from these five projected
+parameters with the same suitability functions and weighted geometric mean as the observed
+ESI. projections_monthly.parquet keeps the ensemble (median, 10th, 90th percentile) of each
+projected parameter, so the app can show the parameters as well as the ESI.
 The model changes are smoothed with an 11-year centred running mean so the yearly series
 shows the climate signal, not one model year's weather. "Observed" means NASA POWER;
 the model's own bias cancels in the delta. The baseline ESI is computed from the observed
@@ -102,10 +108,18 @@ def main() -> None:
     fut["PRECIP"] = fut["PRECIP"] * fut["rP_s"]
     fut["RH2M"] = (fut["RH2M"] + fut["dRH_s"]).clip(1, 100)
     fut["WS10M"] = fut["WS10M"] * fut["rW_s"]
+    nd = pd.read_parquet(PROCESSED / "trends_monthly.parquet")
+    nd = nd[nd["var"] == "NDVI"][["cell", "month", "sen_decade"]].rename(columns={"sen_decade": "ndvi_dec"})
+    fut = fut.merge(nd, on=["cell", "month"], how="left")
+    fut["NDVI"] = (fut["NDVI"] + fut["ndvi_dec"].fillna(0.0) / 10.0 * (fut["year"] - 2020.5)).clip(0.05, 0.95)
     fut["P35"] = p35_from_monthly(fut, ["model", "scenario", "cell", "year"])
     fut = esi_frame(fut)
     keep = ["model", "scenario", "cell", "year", "month", "T2M", "PRECIP", "RH2M", "WS10M", "NDVI", "P35"]
     fut[keep].to_parquet(PROCESSED / "projections_fields.parquet", index=False)   # for the sensitivity analysis
+    fields = ["T2M", "PRECIP", "RH2M", "WS10M", "NDVI"]
+    gm = fut.groupby(["scenario", "cell", "year", "month"])[fields]
+    mon = gm.median().add_suffix("_med").join(gm.quantile(0.1).add_suffix("_p10")).join(gm.quantile(0.9).add_suffix("_p90")).reset_index()
+    mon.to_parquet(PROCESSED / "projections_monthly.parquet", index=False)
 
     b = base.copy()
     b["P35"] = p35_from_monthly(b.assign(k=1), ["cell"])
@@ -118,21 +132,22 @@ def main() -> None:
 
     ann = fut.groupby(["model", "scenario", "cell", "year"]).agg(
         ESI=("ESI", "mean"), ESI_eq=("ESI_eq", "mean"), T2M=("T2M", "mean"), PRECIP=("PRECIP", "sum"),
-        RH2M=("RH2M", "mean"), WS10M=("WS10M", "mean")).reset_index()
+        RH2M=("RH2M", "mean"), WS10M=("WS10M", "mean"), NDVI=("NDVI", "mean")).reset_index()
     ann.to_parquet(PROCESSED / "projections_by_model.parquet", index=False)
 
+    cols = ["ESI", "ESI_eq", "T2M", "PRECIP", "RH2M", "WS10M", "NDVI"]
     q = ann.groupby(["scenario", "cell", "year"])
-    ens = q[["ESI", "ESI_eq", "T2M", "PRECIP", "RH2M", "WS10M"]].median().add_suffix("_med")
-    ens = ens.join(q["ESI"].quantile(0.1).rename("ESI_p10")).join(q["ESI"].quantile(0.9).rename("ESI_p90")).reset_index()
+    ens = q[cols].median().add_suffix("_med").join(q[cols].quantile(0.1).add_suffix("_p10")).join(
+        q[cols].quantile(0.9).add_suffix("_p90")).reset_index()
     ens.to_parquet(PROCESSED / "projections_annual.parquet", index=False)
 
     # national series (weighted by Greek land), per model then ensemble
     ann["w"] = ann["cell"].map(w)
     nat = ann.groupby(["model", "scenario", "year"]).apply(
-        lambda d: pd.Series({c: np.average(d[c], weights=d["w"]) for c in ["ESI", "ESI_eq", "T2M", "PRECIP", "RH2M", "WS10M"]})).reset_index()
+        lambda d: pd.Series({c: np.average(d[c], weights=d["w"]) for c in cols})).reset_index()
     natq = nat.groupby(["scenario", "year"])
-    nat_ens = natq[["ESI", "ESI_eq", "T2M", "PRECIP", "RH2M", "WS10M"]].median().add_suffix("_med").join(
-        natq["ESI"].quantile(0.1).rename("ESI_p10")).join(natq["ESI"].quantile(0.9).rename("ESI_p90")).join(
+    nat_ens = natq[cols].median().add_suffix("_med").join(natq[cols].quantile(0.1).add_suffix("_p10")).join(
+        natq[cols].quantile(0.9).add_suffix("_p90")).join(
         natq["ESI"].min().rename("ESI_min")).join(natq["ESI"].max().rename("ESI_max")).reset_index()
     nat_ens.to_parquet(PROCESSED / "projections_national.parquet", index=False)
     nat.to_parquet(PROCESSED / "projections_national_by_model.parquet", index=False)

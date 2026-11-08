@@ -1,8 +1,9 @@
-// The card of one region on the map. ESI: the value at the chosen time, the five factors (0–1), the ESI over
-// the years and the seasonal cycle. A parameter: its value, the change per five years with the p-value, and
-// the parameter over the years with its trend line.
+// The card of one region on the map. ESI: the value at the chosen time, the five parameters with their
+// suitability (0–1), the ESI over the years and the seasonal cycle. A parameter: its value, the change per
+// five years with the p-value, and the parameter over the years with its trend line. Every chart goes on
+// to 2050 with the SSP2-4.5 projection (median of 8 models, 10–90% range).
 import { useApi, type Panel, type Place } from '../api'
-import { MonthBars, ScoreBars, TimeChart } from './Charts'
+import { MonthBars, TimeChart } from './Charts'
 import { FACTORS, LAYER_INFO, MONTHS, MONTHS_LONG, esiWord, nf, pfmt, signed, trendRows } from '../fmt'
 
 export default function RegionPanel({ cell, layer, year, month, places, onClose }:
@@ -16,7 +17,6 @@ export default function RegionPanel({ cell, layer, year, month, places, onClose 
   const proj = data.kind === 'projection'
   const when = month ? `${MONTHS_LONG[month]} ${year}` : data.partial_months ? `${year} (${MONTHS[1]}–${MONTHS[data.partial_months]})` : `${year}, όλο το έτος`
   const per = month ? MONTHS_LONG[month] : info.esi || layer !== 'PRECIP' ? 'μέσος όρος έτους' : 'σύνολο έτους'
-  const inSeries = data.series.some((p) => p.year === year)
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-start gap-3">
@@ -38,29 +38,56 @@ export default function RegionPanel({ cell, layer, year, month, places, onClose 
         {info.esi && <div className="text-[14px] text-soft mt-1.5">{esiWord(data.value)} συνθήκες</div>}
         {proj && (
           <div className="text-[12.5px] text-soft mt-2 leading-snug">
-            SSP2-4.5, διάμεσος {data.n_models} μοντέλων · εύρος <span className="num">{nf(data.p10, 0)}–{nf(data.p90, 0)}</span>
-            <br />Αλλαγή από το κλίμα 1995–2014: <span className="num">{signed(data.change, 1)}</span>
+            SSP2-4.5, διάμεσος 8 μοντέλων · εύρος <span className="num">{nf(data.p10, info.digits)}–{nf(data.p90, info.digits)}</span>
+            {data.change !== undefined && data.change !== null && <><br />Αλλαγή από το κλίμα 1995–2014: <span className="num">{signed(data.change, 1)}</span></>}
           </div>
         )}
       </div>
 
-      {info.esi ? <EsiDetails data={data} year={year} per={per} inSeries={inSeries} /> : <ParamDetails data={data} layer={layer} year={year} month={month} per={per} inSeries={inSeries} />}
+      {info.esi ? <EsiDetails data={data} year={year} per={per} proj={proj} /> : <ParamDetails data={data} layer={layer} year={year} month={month} per={per} />}
     </div>
   )
 }
 
-function EsiDetails({ data, year, per, inSeries }: { data: Panel; year: number; per: string; inSeries: boolean }) {
+// Observed series + projection (dashed, with the models' 10–90% band) in one chart.
+function rowsWithProjection(data: Panel, extra?: (rows: Record<string, unknown>[]) => Record<string, unknown>[]) {
+  const obs: Record<string, unknown>[] = extra ? extra(data.series.map((p) => ({ ...p }))) : data.series.map((p) => ({ ...p }))
+  return [...obs, ...data.projection.map((p) => ({ year: p.year, p: p.v, lo: p.p10, hi: p.p90 }))]
+}
+
+const FIELD_FMT: Record<string, [number, string]> = { T2M: [1, ' °C'], PRECIP: [0, ' mm'], WS10M: [1, ' m/s'], RH2M: [0, '%'], NDVI: [2, ''] }
+
+function EsiDetails({ data, year, per, proj }: { data: Panel; year: number; per: string; proj: boolean }) {
   const f = data.factors
   const clim = (data.seasonal ?? []).map((m) => ({ label: MONTHS[m.month], early: m.early, late: m.late }))
   const [p1, p2] = data.seasonal_periods ?? ['', '']
+  const rows = rowsWithProjection(data)
+  const first = data.projection[0]?.year
   return (
     <>
-      <Block title="Καταλληλότητα κάθε παράγοντα" sub="0 = καθόλου ευνοϊκός, 1 = ιδανικός">
-        <ScoreBars scores={FACTORS.map((x) => ({ label: x.name, value: f ? f[x.score] : null }))} />
+      <Block title={proj ? 'Πρόβλεψη κάθε παράγοντα' : 'Οι πέντε παράγοντες'} sub="τιμή και καταλληλότητα (0 = καθόλου ευνοϊκή, 1 = ιδανική)">
+        <div className="flex flex-col gap-2.5">
+          {FACTORS.map((x) => {
+            const v = data.fields?.[x.layer] ?? null
+            const s = f ? f[x.score] : null
+            const [d, u] = FIELD_FMT[x.layer]
+            return (
+              <div key={x.key} className="grid grid-cols-[88px_66px_1fr_34px] items-center gap-2 text-[13px]">
+                <span className="text-soft">{x.name}</span>
+                <span className="num text-[12px] text-fg text-right">{v === null ? '—' : `${nf(v, d)}${u}`}</span>
+                <div className="h-2 rounded bg-line-2 overflow-hidden"><div className="h-full rounded bg-[#fe9f6d]" style={{ width: `${Math.max(0, Math.min(1, s ?? 0)) * 100}%` }} /></div>
+                <span className="num text-right">{nf(s, 2)}</span>
+              </div>
+            )
+          })}
+        </div>
+        {proj && <div className="text-[12px] text-muted mt-2">Ο ESI βγαίνει από αυτές τις προβλέψεις με τον τύπο της Επισκόπησης, για κάθε μοντέλο· δείχνεται η διάμεσος των 8.</div>}
       </Block>
-      <Block title={`${LAYER_INFO[data.layer].short} ανά έτος`} sub={`${per} · μετρήσεις NASA`}>
-        <TimeChart data={data.series} series={[{ key: 'v', name: LAYER_INFO[data.layer].short, color: '#fe9f6d', dot: true, width: 1.6 }]} height={170} digits={1}
-          clampY={[0, 100]} refX={inSeries ? { x: year, label: String(year) } : undefined} />
+      <Block title={`${LAYER_INFO[data.layer].short} ανά έτος, ως το 2050`} sub={`${per} · μετρήσεις NASA, μετά πρόβλεψη SSP2-4.5`}>
+        <TimeChart data={rows} height={190} digits={1} clampY={[0, 100]}
+          series={[{ key: 'v', name: 'Μετρήσεις', color: '#fe9f6d', dot: true, width: 1.6 }, { key: 'p', name: 'Πρόβλεψη', color: '#5aa9e6', dashed: true, width: 1.8 }]}
+          bands={[{ lo: 'lo', hi: 'hi', color: '#5aa9e6', name: 'εύρος μοντέλων' }]} shadeFrom={first}
+          refX={{ x: year, label: String(year) }} />
       </Block>
       <Block title="Εποχικός κύκλος" sub={`μέσος όρος κάθε μήνα, ${p1} και ${p2}`}>
         <MonthBars data={clim} keys={[{ key: 'early', name: p1, color: '#5b6b85' }, { key: 'late', name: p2, color: '#fe9f6d' }]} height={170} digits={0} />
@@ -69,10 +96,11 @@ function EsiDetails({ data, year, per, inSeries }: { data: Panel; year: number; 
   )
 }
 
-function ParamDetails({ data, layer, year, month, per, inSeries }: { data: Panel; layer: string; year: number; month: number; per: string; inSeries: boolean }) {
+function ParamDetails({ data, layer, year, month, per }: { data: Panel; layer: string; year: number; month: number; per: string }) {
   const info = LAYER_INFO[layer]
   const t = data.trend
-  const rows = t ? trendRows(data.series, t.sen_decade, t.first, t.last) : data.series
+  const rows = rowsWithProjection(data, (obs) => (t ? trendRows(obs as { year: number; v: number | null }[], t.sen_decade, t.first, t.last) : obs))
+  const first = data.projection[0]?.year
   return (
     <>
       {t ? (
@@ -82,12 +110,15 @@ function ParamDetails({ data, layer, year, month, per, inSeries }: { data: Panel
             <Cell label="p-value" value={pfmt(t.p)} />
             <Cell label="Σημαντική" value={t.significant ? 'Ναι' : 'Όχι'} tone={t.significant ? 'text-ok' : 'text-muted'} />
           </div>
-          <div className="text-[12px] text-muted">Τάση {t.first}–{t.last}{month ? `, ${MONTHS_LONG[month]}` : ''} · Mann-Kendall και κλίση Sen · σημαντική όταν p &lt; 0,05</div>
+          <div className="text-[12px] text-muted">Τάση των μετρήσεων {t.first}–{t.last}{month ? `, ${MONTHS_LONG[month]}` : ''} · Mann-Kendall και κλίση Sen · σημαντική όταν p &lt; 0,05</div>
         </div>
       ) : <div className="text-[13px] text-muted">Δεν υπάρχει αρκετή χρονοσειρά για τάση.</div>}
-      <Block title={`${info.short} ανά έτος`} sub={`${per} · μετρήσεις NASA${info.unit ? ` · ${info.unit}` : ''}`}>
-        <TimeChart data={rows} series={[{ key: 'v', name: info.short, color: '#5aa9e6', dot: true, width: 1.6 }, ...(t ? [{ key: 'trend', name: 'Τάση', color: '#ffcf70', dashed: true, width: 1.6 }] : [])]}
-          height={200} digits={info.digits} refX={inSeries ? { x: year, label: String(year) } : undefined} />
+      <Block title={`${info.short} ανά έτος, ως το 2050`} sub={`${per} · μετρήσεις NASA, μετά πρόβλεψη SSP2-4.5${layer === 'NDVI' ? ' (προέκταση της τάσης)' : ''}${info.unit ? ` · ${info.unit}` : ''}`}>
+        <TimeChart data={rows} height={210} digits={info.digits}
+          series={[{ key: 'v', name: 'Μετρήσεις', color: '#5aa9e6', dot: true, width: 1.6 }, ...(t ? [{ key: 'trend', name: 'Τάση', color: '#ffcf70', dashed: true, width: 1.4 }] : []),
+            { key: 'p', name: 'Πρόβλεψη', color: '#fe9f6d', dashed: true, width: 1.8 }]}
+          bands={[{ lo: 'lo', hi: 'hi', color: '#fe9f6d', name: 'εύρος μοντέλων' }]} shadeFrom={first}
+          refX={{ x: year, label: String(year) }} />
       </Block>
     </>
   )
