@@ -7,6 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { get } from '../api'
 import { colorAt } from '../fmt'
+import { PLACE_EN, useLang } from '../i18n'
 
 maplibregl.setWorkerUrl(workerUrl)
 
@@ -48,6 +49,7 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
   const box = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const [ready, setReady] = useState(false)
+  const lang = useLang()
   const latest = useRef({ values, tooltip, onSelect })
   latest.current = { values, tooltip, onSelect }
 
@@ -57,7 +59,7 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
       container: box.current,
       style: {
         version: 8,
-        sources: { base: { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg'], tileSize: 256, maxzoom: 8, attribution: 'Βάση: NASA GIBS Blue Marble · Δεδομένα: NASA POWER, MODIS, NEX-GDDP-CMIP6' } },
+        sources: { base: { type: 'raster', tiles: ['https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg'], tileSize: 256, maxzoom: 8, attribution: lang === 'en' ? 'Base: NASA GIBS Blue Marble · Data: NASA POWER, MODIS, NEX-GDDP-CMIP6' : 'Βάση: NASA GIBS Blue Marble · Δεδομένα: NASA POWER, MODIS, NEX-GDDP-CMIP6' } },
         layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#0a0e15' } }, { id: 'base', type: 'raster', source: 'base', paint: { 'raster-brightness-max': 0.42, 'raster-saturation': -0.45, 'raster-contrast': 0.05 } }],
       },
       bounds: [[19.0, 34.6], [29.8, 41.9]],
@@ -98,14 +100,14 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
         if (narrow && MINOR_CITIES.has(name)) continue
         const el = document.createElement('div')
         el.style.cssText = 'font:500 10.5px Inter,Segoe UI,sans-serif;color:#e6ebf3;text-shadow:0 0 3px #000,0 0 6px #000;pointer-events:none;white-space:nowrap'
-        el.innerHTML = `<span style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#fff;margin-right:4px;vertical-align:middle"></span>${name}`
+        el.innerHTML = `<span style="display:inline-block;width:4px;height:4px;border-radius:50%;background:#fff;margin-right:4px;vertical-align:middle"></span>${lang === 'en' ? PLACE_EN[name] ?? name : name}`
         new maplibregl.Marker({ element: el, anchor: 'left' }).setLngLat([lon, lat]).addTo(map)
       }
     }
     const ro = new ResizeObserver(() => map.resize())
     ro.observe(box.current)
-    return () => { ro.disconnect(); map.remove(); mapRef.current = null }
-  }, [cities])
+    return () => { ro.disconnect(); map.remove(); mapRef.current = null; setReady(false) }
+  }, [cities, lang])
 
   useEffect(() => {
     const map = mapRef.current
@@ -135,13 +137,14 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
 
 export function Legend({ palette, domain, unit, title, digits = 0, forecast }: { palette: string[]; domain: [number, number]; unit: string; title: string; digits?: number; forecast?: boolean }) {
   const steps = 5
+  const lang = useLang()
   return (
     <div className="flex flex-col gap-1 text-xs">
-      <div className="flex items-center gap-2 text-soft">{title}{forecast && <span className="forecast-badge rounded px-1.5 py-0.5 text-[10.5px] font-semibold">ΠΡΟΒΛΕΨΗ</span>}</div>
+      <div className="flex items-center gap-2 text-soft">{title}{forecast && <span className="forecast-badge rounded px-1.5 py-0.5 text-[10.5px] font-semibold">{lang === 'en' ? 'PROJECTION' : 'ΠΡΟΒΛΕΨΗ'}</span>}</div>
       <div className="h-2.5 rounded" style={{ background: `linear-gradient(90deg, ${palette.join(',')})` }} />
       <div className="flex justify-between num text-muted">
         {Array.from({ length: steps }, (_, i) => domain[0] + ((domain[1] - domain[0]) * i) / (steps - 1)).map((v, i) => (
-          <span key={i}>{v.toLocaleString('el-GR', { maximumFractionDigits: digits })}{i === steps - 1 ? ` ${unit}` : ''}</span>
+          <span key={i}>{v.toLocaleString(lang === 'en' ? 'en-US' : 'el-GR', { maximumFractionDigits: digits })}{i === steps - 1 ? ` ${unit}` : ''}</span>
         ))}
       </div>
     </div>
