@@ -5,7 +5,9 @@ Live εφαρμογή (δημόσια): **https://rea-tau-seven.vercel.app**
 
 ## 1. Πρώτη φορά (περίπου 10 λεπτά)
 
-Χρειάζεσαι: Git, Python 3.12, Node 20 ή νεότερο.
+Χρειάζεσαι: Git, Python 3.12, Node 20 ή νεότερο, και λογαριασμό GitHub. Το repo είναι ιδιωτικό: πρώτα αποδέξου την πρόσκληση του Άρη (έρχεται με email ή στο https://github.com/notifications).
+
+Στα Windows, αν η εντολή `python` ανοίγει το Microsoft Store, γράψε `py -3.12` στη θέση της.
 
 ```bash
 git clone https://github.com/ARIS06PAP/tigerwatch.git
