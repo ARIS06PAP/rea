@@ -1,0 +1,396 @@
+{
+ "athens": {
+  "hobo_vs_power": {
+   "days": 717,
+   "temp_bias_power_minus_hobo": -1.52,
+   "temp_r": 0.985,
+   "rh_bias_power_minus_hobo": 2.8,
+   "rh_r": 0.798
+  },
+  "weekly_spearman_by_lag": [
+   {
+    "lag_weeks": 0,
+    "rho_esi": 0.286,
+    "p": 5.12369440913095e-08,
+    "rho_temperature_score": 0.666,
+    "n": 350
+   },
+   {
+    "lag_weeks": 1,
+    "rho_esi": 0.348,
+    "p": 2.0295136929294024e-11,
+    "rho_temperature_score": 0.692,
+    "n": 350
+   },
+   {
+    "lag_weeks": 2,
+    "rho_esi": 0.379,
+    "p": 2.1395859896914752e-13,
+    "rho_temperature_score": 0.711,
+    "n": 350
+   },
+   {
+    "lag_weeks": 3,
+    "rho_esi": 0.403,
+    "p": 4.270216719384939e-15,
+    "rho_temperature_score": 0.711,
+    "n": 350
+   },
+   {
+    "lag_weeks": 4,
+    "rho_esi": 0.425,
+    "p": 9.422377647299299e-17,
+    "rho_temperature_score": 0.706,
+    "n": 350
+   },
+   {
+    "lag_weeks": 5,
+    "rho_esi": 0.379,
+    "p": 2.1678249848162682e-13,
+    "rho_temperature_score": 0.69,
+    "n": 350
+   },
+   {
+    "lag_weeks": 6,
+    "rho_esi": 0.333,
+    "p": 1.5697960397097916e-10,
+    "rho_temperature_score": 0.67,
+    "n": 350
+   }
+  ],
+  "best_lag_weeks": 2,
+  "score_correlations": {
+   "sT": 0.711,
+   "sP": -0.368,
+   "sRH": -0.516,
+   "sW": 0.128,
+   "sNDVI": -0.685,
+   "ESI": 0.379
+  },
+  "nb_coefficients_log_scores": {
+   "sT": {
+    "coef": 1.93,
+    "p": 5.768333915675714e-20
+   },
+   "sP": {
+    "coef": 0.373,
+    "p": 0.010846425134555585
+   },
+   "sRH": {
+    "coef": 0.276,
+    "p": 0.22907116467835908
+   },
+   "sW": {
+    "coef": 0.007,
+    "p": 0.8765150712286032
+   }
+  },
+  "nb_esi_elasticity": {
+   "coef": 0.87,
+   "p": 0.004061505750940282,
+   "alpha": 3.0
+  },
+  "learned_weights": {
+   "T": 0.746,
+   "P": 0.144,
+   "RH": 0.107,
+   "W": 0.003,
+   "NDVI": 0.0
+  },
+  "validation_2019_season": {
+   "n_weeks": 228,
+   "spearman_equal": 0.381,
+   "spearman_equal_both_seasons": 0.379,
+   "spearman_learned": 0.707,
+   "spearman_learned_both_seasons": 0.75,
+   "spearman_shrunk": 0.666,
+   "spearman_shrunk_both_seasons": 0.695,
+   "spearman_temperature_only": 0.687,
+   "spearman_temperature_only_both_seasons": 0.725
+  },
+  "weights_variants": {
+   "equal": {
+    "T": 0.2,
+    "P": 0.2,
+    "RH": 0.2,
+    "W": 0.2,
+    "NDVI": 0.2
+   },
+   "learned": {
+    "T": 0.746,
+    "P": 0.144,
+    "RH": 0.107,
+    "W": 0.003,
+    "NDVI": 0.0
+   },
+   "shrunk": {
+    "T": 0.473,
+    "P": 0.172,
+    "RH": 0.153,
+    "W": 0.101,
+    "NDVI": 0.1
+   },
+   "temperature_only": {
+    "T": 1.0,
+    "P": 0.0,
+    "RH": 0.0,
+    "W": 0.0,
+    "NDVI": 0.0
+   }
+  },
+  "monthly_cell_esi": {
+   "cell": "38.000_23.750",
+   "n_months": 16,
+   "spearman": 0.82,
+   "p": 0.00010029976845890078,
+   "spearman_temperature": 0.794
+  },
+  "monthly_series": [
+   {
+    "year": 2018,
+    "month": 7,
+    "rate": 4.095,
+    "ESI": 87.127,
+    "sT": 1.0,
+    "sP": 0.639,
+    "sRH": 0.267,
+    "T2M": 28.04,
+    "RH2M": 54.66,
+    "PRECIP": 46.5,
+    "date": "2018-07"
+   },
+   {
+    "year": 2018,
+    "month": 8,
+    "rate": 14.164,
+    "ESI": 40.927,
+    "sT": 1.0,
+    "sP": 0.182,
+    "sRH": 0.322,
+    "T2M": 26.92,
+    "RH2M": 56.15,
+    "PRECIP": 16.43,
+    "date": "2018-08"
+   },
+   {
+    "year": 2018,
+    "month": 9,
+    "rate": 6.773,
+    "ESI": 65.996,
+    "sT": 0.97,
+    "sP": 0.944,
+    "sRH": 0.532,
+    "T2M": 23.9,
+    "RH2M": 60.94,
+    "PRECIP": 84.6,
+    "date": "2018-09"
+   },
+   {
+    "year": 2018,
+    "month": 10,
+    "rate": 3.49,
+    "ESI": 33.748,
+    "sT": 0.338,
+    "sP": 0.222,
+    "sRH": 1.0,
+    "T2M": 18.47,
+    "RH2M": 75.12,
+    "PRECIP": 14.88,
+    "date": "2018-10"
+   },
+   {
+    "year": 2018,
+    "month": 11,
+    "rate": 0.541,
+    "ESI": 11.829,
+    "sT": 0.069,
+    "sP": 0.818,
+    "sRH": 1.0,
+    "T2M": 14.74,
+    "RH2M": 79.92,
+    "PRECIP": 65.1,
+    "date": "2018-11"
+   },
+   {
+    "year": 2018,
+    "month": 12,
+    "rate": 0.0,
+    "ESI": 3.287,
+    "sT": 0.003,
+    "sP": 0.893,
+    "sRH": 1.0,
+    "T2M": 9.79,
+    "RH2M": 79.48,
+    "PRECIP": 68.2,
+    "date": "2018-12"
+   },
+   {
+    "year": 2019,
+    "month": 1,
+    "rate": 0.0,
+    "ESI": 1.506,
+    "sT": 0.001,
+    "sP": 0.999,
+    "sRH": 0.997,
+    "T2M": 8.67,
+    "RH2M": 81.04,
+    "PRECIP": 143.84,
+    "date": "2019-01"
+   },
+   {
+    "year": 2019,
+    "month": 2,
+    "rate": 0.0,
+    "ESI": 1.222,
+    "sT": 0.002,
+    "sP": 0.982,
+    "sRH": 0.979,
+    "T2M": 9.16,
+    "RH2M": 82.67,
+    "PRECIP": 72.24,
+    "date": "2019-02"
+   },
+   {
+    "year": 2019,
+    "month": 3,
+    "rate": 0.006,
+    "ESI": 5.005,
+    "sT": 0.012,
+    "sP": 0.409,
+    "sRH": 1.0,
+    "T2M": 11.82,
+    "RH2M": 76.86,
+    "PRECIP": 29.14,
+    "date": "2019-03"
+   },
+   {
+    "year": 2019,
+    "month": 4,
+    "rate": 0.042,
+    "ESI": 17.362,
+    "sT": 0.046,
+    "sP": 0.979,
+    "sRH": 1.0,
+    "T2M": 13.98,
+    "RH2M": 76.43,
+    "PRECIP": 97.8,
+    "date": "2019-04"
+   },
+   {
+    "year": 2019,
+    "month": 5,
+    "rate": 0.476,
+    "ESI": 37.205,
+    "sT": 0.4,
+    "sP": 0.15,
+    "sRH": 0.804,
+    "T2M": 19.0,
+    "RH2M": 66.73,
+    "PRECIP": 5.89,
+    "date": "2019-05"
+   },
+   {
+    "year": 2019,
+    "month": 6,
+    "rate": 1.119,
+    "ESI": 60.546,
+    "sT": 1.0,
+    "sP": 0.158,
+    "sRH": 0.294,
+    "T2M": 25.92,
+    "RH2M": 55.41,
+    "PRECIP": 18.9,
+    "date": "2019-06"
+   },
+   {
+    "year": 2019,
+    "month": 7,
+    "rate": 2.009,
+    "ESI": 52.134,
+    "sT": 1.0,
+    "sP": 0.104,
+    "sRH": 0.168,
+    "T2M": 27.28,
+    "RH2M": 51.35,
+    "PRECIP": 10.23,
+    "date": "2019-07"
+   },
+   {
+    "year": 2019,
+    "month": 8,
+    "rate": 1.557,
+    "ESI": 22.503,
+    "sT": 1.0,
+    "sP": 0.056,
+    "sRH": 0.225,
+    "T2M": 27.4,
+    "RH2M": 53.38,
+    "PRECIP": 1.24,
+    "date": "2019-08"
+   },
+   {
+    "year": 2019,
+    "month": 9,
+    "rate": 1.437,
+    "ESI": 41.667,
+    "sT": 0.977,
+    "sP": 0.067,
+    "sRH": 0.407,
+    "T2M": 24.04,
+    "RH2M": 58.22,
+    "PRECIP": 5.4,
+    "date": "2019-09"
+   },
+   {
+    "year": 2019,
+    "month": 10,
+    "rate": 3.952,
+    "ESI": 57.155,
+    "sT": 0.614,
+    "sP": 0.332,
+    "sRH": 0.97,
+    "T2M": 20.62,
+    "RH2M": 71.92,
+    "PRECIP": 33.79,
+    "date": "2019-10"
+   }
+  ],
+  "seasonal_profile_rate_per_trap_day": {
+   "1": 0.0,
+   "2": 0.0,
+   "3": 0.01,
+   "4": 0.04,
+   "5": 0.48,
+   "6": 1.12,
+   "7": 2.53,
+   "8": 7.73,
+   "9": 4.37,
+   "10": 3.7,
+   "11": 0.54,
+   "12": 0.0
+  }
+ },
+ "thessaly": {
+  "trap_nights": 890,
+  "cell_months": 58,
+  "cells": [
+   "39.500_21.875",
+   "39.500_22.500",
+   "39.500_23.125",
+   "40.000_22.500"
+  ],
+  "spearman_esi_aedes_genus": 0.34,
+  "p_aedes": 0.0090771453635089,
+  "spearman_esi_culex": 0.387,
+  "spearman_temperature_aedes_genus": 0.316,
+  "monthly_profile_aedes": {
+   "5": 3.97,
+   "6": 4.47,
+   "7": 7.29,
+   "8": 2.62,
+   "9": 9.61,
+   "10": 4.0,
+   "11": 0.68
+  }
+ }
+}

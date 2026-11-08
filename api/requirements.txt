@@ -1,0 +1,5 @@
+# Runtime of the API only (what a server needs to serve the app)
+fastapi>=0.115
+uvicorn[standard]>=0.30
+duckdb>=1.1
+numpy>=2.0

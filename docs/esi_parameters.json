@@ -1,0 +1,28 @@
+{
+ "note": "Weights of the main ESI, chosen on training data only (Athens 2018 trap season + GBIF records up to 2018) among all weight vectors with step 0.05 inside evidence-based caps (temperature free; rain ≤ 0.25; humidity, wind, vegetation ≤ 0.15), by the mean of the seasonal correlation and the spatial Gini; tested once on later data (Athens 2019 season, cells first recorded from 2019 on). Equal weights are kept as ESI_eq. See data/processed/calibration.json.",
+ "weights": {
+  "T": 0.563,
+  "P": 0.246,
+  "RH": 0.02,
+  "W": 0.151,
+  "NDVI": 0.02
+ },
+ "caps": {
+  "T": 1.0,
+  "P": 0.25,
+  "RH": 0.15,
+  "W": 0.15,
+  "NDVI": 0.15
+ },
+ "P": {
+  "T_cold": 12.6,
+  "T_warm": 37.1,
+  "W_mid": 4.6,
+  "W_scale": 0.3
+ },
+ "P_notes": {
+  "T_cold": "9 °C is a MINIMUM temperature that ends seasonal adult activity (verified source, id 3). With monthly MEAN temperature as the input, 9 °C of mean daily minimum ≈ 9 + 3.6 = 12.6 °C of mean temperature (3.6 °C = half the daily range, NASA POWER daily, 16 Greek cities, spring/autumn).",
+  "T_warm": "37.1 °C: upper end of the temperature range over which the field model of Yin et al. 2019 predicts host-seeking (id 2); used where the temperature score falls to 0.02, not as a survival limit.",
+  "W_mid": "No effect of 5-week mean wind up to 4.3 m/s, negative above (Bartholomée et al. 2025, id 11): sigmoid with 0.73 at 4.3 m/s, 0.5 at 4.6 m/s, 0.21 at 5 m/s."
+ }
+}

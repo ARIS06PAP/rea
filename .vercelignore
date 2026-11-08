@@ -1,0 +1,8 @@
+.venv
+**/node_modules
+**/__pycache__
+data/raw
+data/processed/*.parquet
+data/processed/*log*.txt
+data/api_server.log
+web/dist

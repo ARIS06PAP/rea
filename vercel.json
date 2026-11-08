@@ -1,0 +1,17 @@
+{
+  "buildCommand": "cd web && npm install && npx vite build",
+  "outputDirectory": "web/dist",
+  "installCommand": "echo skip",
+  "framework": null,
+  "regions": ["fra1"],
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30,
+      "includeFiles": "{api/**,data/tiger.duckdb,pipeline/trendstats.py,docs/esi_parameters.json,data/processed/esi_parameters_used.json}"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/((?!api/|assets/).*)", "destination": "/index.html" }
+  ]
+}

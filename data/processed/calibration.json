@@ -1,0 +1,148 @@
+{
+ "split": {
+  "athens_train": "2018 season",
+  "athens_test": "2019 season",
+  "gbif_train": "cells with a record ≤ 2018",
+  "gbif_test": "cells first recorded ≥ 2019",
+  "n_train_cells": 41,
+  "n_test_cells": 26,
+  "n_never": 44
+ },
+ "best_on_grid": {
+  "weights": {
+   "T": 0.6,
+   "P": 0.25,
+   "RH": 0.0,
+   "W": 0.15,
+   "NDVI": 0.0
+  }
+ },
+ "blends": [
+  {
+   "alpha": 1.0,
+   "weights": {
+    "T": 0.6,
+    "P": 0.25,
+    "RH": 0.0,
+    "W": 0.15,
+    "NDVI": 0.0
+   },
+   "objective_train": 0.615,
+   "rho_train": 0.712,
+   "rho_test": 0.667,
+   "auc_train": 0.759,
+   "auc_test": 0.722
+  },
+  {
+   "alpha": 0.9,
+   "weights": {
+    "T": 0.563,
+    "P": 0.246,
+    "RH": 0.02,
+    "W": 0.151,
+    "NDVI": 0.02
+   },
+   "objective_train": 0.588,
+   "rho_train": 0.687,
+   "rho_test": 0.664,
+   "auc_train": 0.745,
+   "auc_test": 0.708
+  },
+  {
+   "alpha": 0.8,
+   "weights": {
+    "T": 0.525,
+    "P": 0.242,
+    "RH": 0.04,
+    "W": 0.152,
+    "NDVI": 0.04
+   },
+   "objective_train": 0.57,
+   "rho_train": 0.666,
+   "rho_test": 0.661,
+   "auc_train": 0.737,
+   "auc_test": 0.701
+  },
+  {
+   "alpha": 0.7,
+   "weights": {
+    "T": 0.487,
+    "P": 0.239,
+    "RH": 0.061,
+    "W": 0.152,
+    "NDVI": 0.061
+   },
+   "objective_train": 0.558,
+   "rho_train": 0.655,
+   "rho_test": 0.657,
+   "auc_train": 0.731,
+   "auc_test": 0.696
+  },
+  {
+   "alpha": 0.6,
+   "weights": {
+    "T": 0.449,
+    "P": 0.235,
+    "RH": 0.082,
+    "W": 0.153,
+    "NDVI": 0.082
+   },
+   "objective_train": 0.541,
+   "rho_train": 0.64,
+   "rho_test": 0.648,
+   "auc_train": 0.721,
+   "auc_test": 0.691
+  },
+  {
+   "alpha": 0.5,
+   "weights": {
+    "T": 0.41,
+    "P": 0.231,
+    "RH": 0.103,
+    "W": 0.154,
+    "NDVI": 0.103
+   },
+   "objective_train": 0.519,
+   "rho_train": 0.609,
+   "rho_test": 0.631,
+   "auc_train": 0.715,
+   "auc_test": 0.685
+  }
+ ],
+ "chosen": {
+  "weights": {
+   "T": 0.563,
+   "P": 0.246,
+   "RH": 0.02,
+   "W": 0.151,
+   "NDVI": 0.02
+  },
+  "rho_train": 0.687,
+  "rho_test": 0.664,
+  "auc_train": 0.745,
+  "auc_test": 0.708,
+  "objective_train": 0.588
+ },
+ "equal": {
+  "weights": {
+   "T": 0.2,
+   "P": 0.2,
+   "RH": 0.2,
+   "W": 0.2,
+   "NDVI": 0.2
+  },
+  "rho_train": 0.329,
+  "rho_test": 0.381,
+  "auc_train": 0.799,
+  "auc_test": 0.743
+ },
+ "temperature_only": {
+  "weights": {
+   "T": 1.0
+  },
+  "rho_train": 0.747,
+  "rho_test": 0.687,
+  "auc_train": 0.309,
+  "auc_test": 0.427
+ }
+}

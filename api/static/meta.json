@@ -1,0 +1,94 @@
+{
+ "built_at": "2026-11-08T01:21",
+ "coverage": {
+  "T2M": {
+   "first": "1981-01",
+   "last": "2026-09",
+   "missing_cell_months": 0
+  },
+  "PRECIP": {
+   "first": "1981-01",
+   "last": "2026-09",
+   "missing_cell_months": 0
+  },
+  "RH2M": {
+   "first": "1981-01",
+   "last": "2026-09",
+   "missing_cell_months": 0
+  },
+  "WS10M": {
+   "first": "1981-01",
+   "last": "2026-09",
+   "missing_cell_months": 0
+  },
+  "NDVI": {
+   "first": "2000-02",
+   "last": "2026-09",
+   "missing_cell_months": 25420
+  },
+  "common_period": {
+   "first": "2000-02",
+   "last": "2026-09"
+  },
+  "cells": 111,
+  "last_complete_year": 2025
+ },
+ "weights": {
+  "main": {
+   "T": 0.563,
+   "P": 0.246,
+   "RH": 0.02,
+   "W": 0.151,
+   "NDVI": 0.02
+  },
+  "equal": {
+   "T": 0.2,
+   "P": 0.2,
+   "RH": 0.2,
+   "W": 0.2,
+   "NDVI": 0.2
+  }
+ },
+ "esi_parameters": {
+  "T_lo": 25.0,
+  "T_hi": 30.0,
+  "T_cold": 12.6,
+  "T_warm": 37.1,
+  "edge": 0.02,
+  "P_lo": 90.0,
+  "P_hi": 800.0,
+  "RH_lo": 75.0,
+  "RH_hi": 80.0,
+  "RH_dry": 40.0,
+  "RH_wet": 100.0,
+  "W_mid": 4.6,
+  "W_scale": 0.3,
+  "NDVI_mid": 0.2,
+  "NDVI_scale": 0.05
+ },
+ "grid": {
+  "lat_step": 0.5,
+  "lon_step": 0.625,
+  "source": "NASA POWER / MERRA-2 native grid",
+  "cells": 111
+ },
+ "scenarios": {
+  "ssp245": "SSP2-4.5 (ενδιάμεσες εκπομπές)",
+  "ssp585": "SSP5-8.5 (υψηλές εκπομπές)"
+ },
+ "snapshots": [
+  2030,
+  2040,
+  2050
+ ],
+ "models": [
+  "ACCESS-CM2",
+  "CNRM-ESM2-1",
+  "EC-Earth3",
+  "INM-CM5-0",
+  "IPSL-CM6A-LR",
+  "MPI-ESM1-2-HR",
+  "MRI-ESM2-0",
+  "NorESM2-MM"
+ ]
+}

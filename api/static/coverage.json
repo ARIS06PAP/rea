@@ -1,0 +1,33 @@
+{
+ "T2M": {
+  "first": "1981-01",
+  "last": "2026-09",
+  "missing_cell_months": 0
+ },
+ "PRECIP": {
+  "first": "1981-01",
+  "last": "2026-09",
+  "missing_cell_months": 0
+ },
+ "RH2M": {
+  "first": "1981-01",
+  "last": "2026-09",
+  "missing_cell_months": 0
+ },
+ "WS10M": {
+  "first": "1981-01",
+  "last": "2026-09",
+  "missing_cell_months": 0
+ },
+ "NDVI": {
+  "first": "2000-02",
+  "last": "2026-09",
+  "missing_cell_months": 25420
+ },
+ "common_period": {
+  "first": "2000-02",
+  "last": "2026-09"
+ },
+ "cells": 111,
+ "last_complete_year": 2025
+}

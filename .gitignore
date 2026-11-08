@@ -1,0 +1,18 @@
+# environments and builds
+.venv/
+**/node_modules/
+**/__pycache__/
+*.pyc
+web/dist/
+web/tsconfig.tsbuildinfo
+
+# raw downloads (287 MB): published as a release asset, see TEAM_GUIDE.md
+data/raw/
+
+# local logs and temporary files
+data/*.log
+data/*.tmp
+data/processed/*log*.txt
+
+# Vercel project link (deploys go through the owner's account)
+.vercel/

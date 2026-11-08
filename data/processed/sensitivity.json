@@ -1,0 +1,274 @@
+{
+ "variants": [
+  {
+   "variant": "main (trap-calibrated)",
+   "esi_2016_2025": 29.15,
+   "trend_decade": 1.53,
+   "trend_p": 0.0142,
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.29,
+   "athens_2019_rho": 0.664,
+   "weights": {
+    "T": 0.563,
+    "P": 0.246,
+    "RH": 0.02,
+    "W": 0.151,
+    "NDVI": 0.02
+   }
+  },
+  {
+   "variant": "equal",
+   "esi_2016_2025": 38.83,
+   "trend_decade": 1.02,
+   "trend_p": 0.2723,
+   "d2050_ssp245": 0.22,
+   "d2050_ssp585": 1.14,
+   "athens_2019_rho": 0.381,
+   "weights": {
+    "T": 0.2,
+    "P": 0.2,
+    "RH": 0.2,
+    "W": 0.2,
+    "NDVI": 0.2
+   }
+  },
+  {
+   "variant": "temperature only",
+   "esi_2016_2025": 36.68,
+   "trend_decade": 2.0,
+   "trend_p": 0.0001,
+   "d2050_ssp245": 4.71,
+   "d2050_ssp585": 6.51,
+   "athens_2019_rho": 0.687,
+   "weights": {
+    "T": 1,
+    "P": 0.0,
+    "RH": 0.0,
+    "W": 0.0,
+    "NDVI": 0.0
+   }
+  },
+  {
+   "variant": "without T",
+   "esi_2016_2025": 57.68,
+   "trend_decade": 0.51,
+   "trend_p": 0.7614,
+   "d2050_ssp245": -3.98,
+   "d2050_ssp585": -3.77,
+   "athens_2019_rho": -0.234,
+   "weights": {
+    "T": 0.0,
+    "P": 0.246,
+    "RH": 0.02,
+    "W": 0.151,
+    "NDVI": 0.02
+   }
+  },
+  {
+   "variant": "without P",
+   "esi_2016_2025": 35.27,
+   "trend_decade": 1.54,
+   "trend_p": 0.0003,
+   "d2050_ssp245": 3.9,
+   "d2050_ssp585": 5.5,
+   "athens_2019_rho": 0.679,
+   "weights": {
+    "T": 0.563,
+    "P": 0.0,
+    "RH": 0.02,
+    "W": 0.151,
+    "NDVI": 0.02
+   }
+  },
+  {
+   "variant": "without RH",
+   "esi_2016_2025": 29.43,
+   "trend_decade": 1.62,
+   "trend_p": 0.0125,
+   "d2050_ssp245": 2.06,
+   "d2050_ssp585": 3.5,
+   "athens_2019_rho": 0.665,
+   "weights": {
+    "T": 0.563,
+    "P": 0.246,
+    "RH": 0.0,
+    "W": 0.151,
+    "NDVI": 0.02
+   }
+  },
+  {
+   "variant": "without W",
+   "esi_2016_2025": 27.8,
+   "trend_decade": 1.57,
+   "trend_p": 0.0161,
+   "d2050_ssp245": 1.93,
+   "d2050_ssp585": 3.25,
+   "athens_2019_rho": 0.707,
+   "weights": {
+    "T": 0.563,
+    "P": 0.246,
+    "RH": 0.02,
+    "W": 0.0,
+    "NDVI": 0.02
+   }
+  },
+  {
+   "variant": "without NDVI",
+   "esi_2016_2025": 28.73,
+   "trend_decade": 1.53,
+   "trend_p": 0.0183,
+   "d2050_ssp245": 1.86,
+   "d2050_ssp585": 3.24,
+   "athens_2019_rho": 0.664,
+   "weights": {
+    "T": 0.563,
+    "P": 0.246,
+    "RH": 0.02,
+    "W": 0.151,
+    "NDVI": 0.0
+   }
+  },
+  {
+   "variant": "arithmetic combination (main weights)",
+   "esi_2016_2025": 49.87,
+   "trend_decade": 1.07,
+   "trend_p": 0.0,
+   "d2050_ssp245": 1.79,
+   "d2050_ssp585": 2.33,
+   "athens_2019_rho": null
+  },
+  {
+   "variant": "NDVI ×0.9 in the future",
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.29
+  },
+  {
+   "variant": "NDVI ×1.1 in the future",
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.29
+  },
+  {
+   "variant": "T_lo -1",
+   "esi_2016_2025": 30.18,
+   "trend_decade": 1.57,
+   "trend_p": 0.0235,
+   "d2050_ssp245": 1.73,
+   "d2050_ssp585": 3.14
+  },
+  {
+   "variant": "T_lo +1",
+   "esi_2016_2025": 28.13,
+   "trend_decade": 1.5,
+   "trend_p": 0.0161,
+   "d2050_ssp245": 2.05,
+   "d2050_ssp585": 3.41
+  },
+  {
+   "variant": "T_hi -1",
+   "esi_2016_2025": 29.14,
+   "trend_decade": 1.54,
+   "trend_p": 0.0161,
+   "d2050_ssp245": 1.88,
+   "d2050_ssp585": 3.19
+  },
+  {
+   "variant": "T_hi +1",
+   "esi_2016_2025": 29.16,
+   "trend_decade": 1.54,
+   "trend_p": 0.0142,
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.3
+  },
+  {
+   "variant": "T_cold -2",
+   "esi_2016_2025": 32.67,
+   "trend_decade": 1.59,
+   "trend_p": 0.0299,
+   "d2050_ssp245": 1.72,
+   "d2050_ssp585": 3.09
+  },
+  {
+   "variant": "T_cold +2",
+   "esi_2016_2025": 25.74,
+   "trend_decade": 1.46,
+   "trend_p": 0.0109,
+   "d2050_ssp245": 2.12,
+   "d2050_ssp585": 3.49
+  },
+  {
+   "variant": "P_lo -27",
+   "esi_2016_2025": 31.59,
+   "trend_decade": 1.79,
+   "trend_p": 0.0109,
+   "d2050_ssp245": 2.05,
+   "d2050_ssp585": 3.51
+  },
+  {
+   "variant": "P_lo +27",
+   "esi_2016_2025": 27.37,
+   "trend_decade": 1.4,
+   "trend_p": 0.0208,
+   "d2050_ssp245": 1.91,
+   "d2050_ssp585": 3.15
+  },
+  {
+   "variant": "RH_lo -10",
+   "esi_2016_2025": 29.36,
+   "trend_decade": 1.58,
+   "trend_p": 0.0161,
+   "d2050_ssp245": 1.88,
+   "d2050_ssp585": 3.28
+  },
+  {
+   "variant": "RH_lo +10",
+   "esi_2016_2025": 28.95,
+   "trend_decade": 1.53,
+   "trend_p": 0.0161,
+   "d2050_ssp245": 1.91,
+   "d2050_ssp585": 3.29
+  },
+  {
+   "variant": "W_mid -0.5",
+   "esi_2016_2025": 28.04,
+   "trend_decade": 1.45,
+   "trend_p": 0.0265,
+   "d2050_ssp245": 1.81,
+   "d2050_ssp585": 3.18
+  },
+  {
+   "variant": "W_mid +0.5",
+   "esi_2016_2025": 29.95,
+   "trend_decade": 1.61,
+   "trend_p": 0.0142,
+   "d2050_ssp245": 1.99,
+   "d2050_ssp585": 3.38
+  },
+  {
+   "variant": "NDVI_mid -0.05",
+   "esi_2016_2025": 29.16,
+   "trend_decade": 1.53,
+   "trend_p": 0.0142,
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.29
+  },
+  {
+   "variant": "NDVI_mid +0.05",
+   "esi_2016_2025": 29.15,
+   "trend_decade": 1.53,
+   "trend_p": 0.0142,
+   "d2050_ssp245": 1.9,
+   "d2050_ssp585": 3.29
+  }
+ ],
+ "monte_carlo_weights": {
+  "n": 300,
+  "esi_2016_2025_p05_p95": [
+   27.24,
+   33.23
+  ],
+  "athens_rho_p05_p95": [
+   0.544,
+   0.699
+  ]
+ }
+}
