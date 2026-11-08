@@ -33,8 +33,12 @@ export function niceDomain(vals: number[], fixed?: [number, number]): [number, n
   const lo = v[Math.floor(v.length * 0.02)], hi = v[Math.ceil(v.length * 0.98) - 1]
   return lo === hi ? [lo - 1, hi + 1] : [lo, hi]
 }
-export const esiWord = (x: number | null | undefined) =>
-  x === null || x === undefined ? '—' : x >= 60 ? 'Πολύ ευνοϊκές' : x >= 45 ? 'Ευνοϊκές' : x >= 30 ? 'Μέτριες' : x >= 15 ? 'Περιορισμένες' : 'Δυσμενείς'
+// The word follows the number as it is shown (a whole number), so a displayed «30» always reads «Μέτριες».
+export const esiWord = (x: number | null | undefined) => {
+  if (x === null || x === undefined || !Number.isFinite(x)) return '—'
+  const r = Math.round(x)
+  return r >= 60 ? 'Πολύ ευνοϊκές' : r >= 45 ? 'Ευνοϊκές' : r >= 30 ? 'Μέτριες' : r >= 15 ? 'Περιορισμένες' : 'Δυσμενείς'
+}
 
 // "Μάι–Οκτ" style text for a set of months (1–12); separate runs are joined with commas.
 export function monthRange(months: number[]): string {
