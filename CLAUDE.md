@@ -27,7 +27,8 @@ Live: https://rea-tau-seven.vercel.app. Full method: `README.md` (Greek). Team w
 - Check before any commit: `cd web && npm run build` (tsc plus vite) must pass.
 
 ## Rules
-- UI text is Greek; English only for technical terms.
+- UI text exists in English and Greek: every string goes through `t(el, en)` from `web/src/i18n.ts`. The app opens in English; the EN | EL switch is in the header.
+- The logo is the team's R.E.A. logo. The light versions in `web/public/` are made by `web/scripts/logo_dark.py` from `web/scripts/rea-logo-source.png`.
 - The ESI is suitability, never mosquito counts or disease risk. Never claim causality from correlations.
 - Projections are always labelled as projections: hatch, «ΠΡΟΒΛΕΨΗ» badge, model spread. Only SSP2-4.5 is offered to the user.
 - The current year is partial. Never present it as a complete year.

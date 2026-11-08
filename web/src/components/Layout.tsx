@@ -4,19 +4,9 @@ import { useApi, type Meta } from '../api'
 import { monthsLong } from '../fmt'
 import { setLang, useLang, useT } from '../i18n'
 
-export function Logo({ size = 30 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <defs>
-        <radialGradient id="rea-planet" cx=".35" cy=".35" r=".75">
-          <stop offset="0" stopColor="#a9d6ff" /><stop offset=".55" stopColor="#22528f" /><stop offset="1" stopColor="#0a1a33" />
-        </radialGradient>
-      </defs>
-      <circle cx="16" cy="16" r="7.5" fill="url(#rea-planet)" />
-      <ellipse cx="16" cy="16" rx="14" ry="5" transform="rotate(-24 16 16)" fill="none" stroke="#6fb7ff" strokeOpacity=".75" strokeWidth="1" />
-      <circle cx="28.2" cy="10.9" r="1.6" fill="#e6ecf5" />
-    </svg>
-  )
+// The R.E.A. logo: mosquito over a globe (light version for the dark UI, made by web/scripts/logo_dark.py).
+export function Logo({ size = 34 }: { size?: number }) {
+  return <img src="/rea-icon-dark.png" alt="" width={Math.round((size * 107) / 115)} height={size} className="shrink-0" />
 }
 
 function LangSwitch() {
@@ -72,10 +62,11 @@ export default function Layout() {
       </header>
       <main className="flex-1 mx-auto w-full max-w-[1400px] px-4 py-6"><Outlet /></main>
       <footer className="border-t border-line text-[11.5px] text-muted">
-        <div className="mx-auto max-w-[1400px] px-4 py-4 flex flex-wrap gap-x-6 gap-y-1">
+        <div className="mx-auto max-w-[1400px] px-4 py-4 flex flex-wrap items-center gap-x-6 gap-y-2">
           <span><b className="text-soft">Mosquito Track</b> · NASA Space Apps 2026</span>
           <span>{t('Δεδομένα', 'Data')}: NASA POWER · MODIS · NEX-GDDP-CMIP6</span>
           <span>{t('Δείχνει καταλληλότητα, όχι κουνούπια ή κρούσματα.', 'Shows suitability, not mosquitoes or disease cases.')}</span>
+          <img src="/rea-logo-dark.png" alt="R.E.A." width={73} height={28} className="ml-auto" />
         </div>
       </footer>
     </div>
