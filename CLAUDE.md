@@ -1,6 +1,6 @@
-# R.E.A. (Revealing Earth's Alterations): το κουνούπι τίγρη στην Ελλάδα
+# Mosquito Track: το κουνούπι τίγρη στην Ελλάδα
 
-Hackathon app (NASA Space Apps 2026): environmental suitability (ESI, 0–100) of the tiger mosquito *Aedes albopictus* for all of Greece. It uses NASA POWER data from 1981 (T2M, PRECTOTCORR, RH2M, WS10M), MODIS NDVI from 2000, and CMIP6 projections (NEX-GDDP, 8 models, SSP2-4.5 and SSP5-8.5) to 2050.
+Hackathon app (NASA Space Apps 2026): environmental suitability (ESI, 0–100) of the tiger mosquito *Aedes albopictus* for all of Greece. It uses NASA POWER data from 1981 (T2M, PRECTOTCORR, RH2M, WS10M), MODIS NDVI from 2000, and CMIP6 projections (NEX-GDDP, 8 models) to 2050. The app shows SSP2-4.5 only; the pipeline also computes SSP5-8.5.
 Live: https://rea-tau-seven.vercel.app. Full method: `README.md` (Greek). Team workflow: `TEAM_GUIDE.md`.
 
 ## Architecture
@@ -9,8 +9,12 @@ Live: https://rea-tau-seven.vercel.app. Full method: `README.md` (Greek). Team w
   - Raw data live in `data/raw/`, which is not in git (release `data-2026-11`).
 - `data/tiger.duckdb`: the database built by `export.py`. The API opens it read-only.
 - `api/main.py`: FastAPI. Every number the UI shows comes from here. It also serves `web/dist`. Vercel entry: `api/index.py` plus `vercel.json`.
-- `web/`: React 19, TypeScript, Tailwind 4, MapLibre, Recharts. Eight pages in `web/src/pages/` (home, map, compare, parameters, history, 2050, validation, method).
-- UI rule: each screen leads with one sentence and one big number; details go under a fold (`<details>`, Page `more`). No emoji, no pill chips, no heavy side panels.
+  - The map uses `/api/map` (any year and month; ESI projections for 2027–2050 from `proj_scores`, SSP2-4.5) and `/api/panel/{cell}` (the region card).
+- `web/`: React 19, TypeScript, Tailwind 4, MapLibre, Recharts. Three sections in `web/src/pages/`:
+  - `OverviewPage` (what the ESI is, the five parameters and their weights);
+  - `MapPage` with `components/RegionPanel` (one layer, a year slider, a month; one region at a time; state in the URL);
+  - `ResultsPage` (every parameter over time for Greece, and the regions with the highest and lowest ESI).
+- UI rule: a clean app with only what is needed. No text blocks, no emoji, no pill chips. The team decided this structure (8/11): don't add pages or sections without asking.
 
 ## Commands
 - API and app: `python -m uvicorn api.main:app --port 8010`, then open http://localhost:8010.
@@ -20,8 +24,9 @@ Live: https://rea-tau-seven.vercel.app. Full method: `README.md` (Greek). Team w
 ## Rules
 - UI text is Greek; English only for technical terms.
 - The ESI is suitability, never mosquito counts or disease risk. Never claim causality from correlations.
-- Projections are always labelled as projections: hatch, «ΠΡΟΒΛΕΨΗ» badge, model spread.
+- Projections are always labelled as projections: hatch, «ΠΡΟΒΛΕΨΗ» badge, model spread. Only SSP2-4.5 is offered to the user.
 - The current year is partial. Never present it as a complete year.
+- A trend is «σημαντική» when its Mann-Kendall p < 0.05; changes are shown per 5 years (Sen slope per decade / 2).
 - Never invent or fill in data. Every scientific value needs its source in `docs/science_values.json`.
 - Weights and function parameters live in `docs/esi_parameters.json`. After changing them, rerun the pipeline.
 - No secrets in the repo.

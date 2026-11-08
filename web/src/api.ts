@@ -1,4 +1,4 @@
-// Thin client for the R.E.A. API (FastAPI over DuckDB). Responses are cached per URL.
+// Thin client for the Mosquito Track API (FastAPI over DuckDB). Responses are cached per URL.
 import { useEffect, useState } from 'react'
 
 const cache = new Map<string, Promise<unknown>>()
@@ -48,9 +48,24 @@ export type Meta = {
 }
 export type Trend = { sen_decade: number; ci: [number, number]; p: number; significant: boolean; n: number; first: number; last: number; total: number } | null
 export type MapLayer = {
-  kind: 'observed' | 'projection'; partial?: boolean; months?: number; year: number; month: number; layer: string; scenario?: string; window?: string
+  kind: 'observed' | 'projection'; partial?: boolean; months?: number; year: number; month: number; layer: string; scenario?: string
   values: Record<string, number | null>
-  extra?: Record<string, { p10?: number; p90?: number; change?: number; agree_up?: number; base?: number }>
+  domain?: [number, number]
+  extra?: Record<string, { p10?: number | null; p90?: number | null; change?: number | null }>
+}
+export type Point = { year: number; v: number | null }
+export type Panel = {
+  cell: { cell: string; lat: number; lon: number; region: string }
+  layer: string; year: number; month: number
+  kind: 'observed' | 'projection'
+  value: number | null
+  partial_months?: number
+  p10?: number | null; p90?: number | null; change?: number | null; n_models?: number | null
+  factors?: Record<'sT' | 'sP' | 'sRH' | 'sW' | 'sNDVI', number | null>
+  series: Point[]
+  seasonal?: { month: number; early: number | null; late: number | null }[]
+  seasonal_periods?: [string, string]
+  trend?: { per5: number; sen_decade: number; p: number | null; significant: boolean; first: number; last: number; n: number } | null
 }
 export type National = {
   annual: Record<string, number | null>[]
@@ -65,24 +80,4 @@ export type National = {
   last_month: { year: number; month: number }
 }
 
-export const PARAM_KEYS = ['T2M', 'PRECIP', 'RH2M', 'WS10M', 'NDVI'] as const
-export const LAYER_KEYS = ['ESI', 'ESI_eq', ...PARAM_KEYS] as const
-
 export type Place = { name: string; lat: number; lon: number; cell: string; region: string; inside: boolean; km: number }
-export type Season = { n: number; months: number[] }
-export type Summary = {
-  cell: Cell & { land: number; mainland_share: number }
-  period_now: string
-  esi_now: number | null
-  esi_early: number | null
-  percentile: number | null
-  season: { early: Season; now: Season }
-  monthly: { early: (number | null)[]; now: (number | null)[] }
-  trend: { sen_decade: number; ci: [number, number]; p: number; significant: boolean; first: number; last: number } | null
-  t_trend: { sen_decade: number; ci: [number, number]; p: number; significant: boolean; first: number; last: number } | null
-  proj: Record<'ssp245' | 'ssp585', { esi: number | null; p10: number | null; p90: number | null; change: number | null; agree_up: number | null; n_models: number | null; monthly: (number | null)[]; season: Season }>
-  factors: Record<'sT' | 'sP' | 'sRH' | 'sW' | 'sNDVI', number>
-  climate: { t_year: number; t_jan: number; t_jul: number; rain_year: number; rh: number; wind: number; ndvi: number }
-  annual: { year: number; v: number }[]
-  favourable_threshold: number
-}

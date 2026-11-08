@@ -1,5 +1,5 @@
 // Interactive map of Greece: every NASA POWER grid cell drawn as the Greek land inside it,
-// coloured by the selected layer. Click to select cells (comparison), hover for values.
+// coloured by the selected layer. Click to select a cell, hover for values.
 // Projection layers get a hatched overlay and a dashed outline, so they never look like measurements.
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
