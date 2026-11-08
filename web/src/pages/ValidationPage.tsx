@@ -47,8 +47,9 @@ export default function ValidationPage() {
     { name: 'Κύριος ESI', rho: cal.chosen.rho_test, auc: cal.chosen.auc_test },
   ]
   return (
-    <Page eyebrow="Αφθονία & επικύρωση" title="Ταιριάζει ο δείκτης με τα πραγματικά κουνούπια;"
-      lead={<>Ο ESI μετρά <b>περιβαλλοντική καταλληλότητα</b>, όχι αφθονία. Για να δούμε αν έχει νόημα, τον συγκρίνουμε με πραγματικές καταγραφές: εβδομαδιαίες παγίδες στην Αθήνα (2018–2019), καταγραφές παρουσίας σε όλη την Ελλάδα (GBIF) και παγίδες στη Θεσσαλία. Τα βάρη επιλέχθηκαν με δεδομένα ως το 2018 και ελέγχθηκαν σε μεταγενέστερα, χωρίς διαρροή πληροφορίας.</>}>
+    <Page eyebrow="Επικύρωση" title="Ταιριάζει ο δείκτης με τα πραγματικά κουνούπια;"
+      lead="Τον ελέγξαμε σε πραγματικές παγίδες και καταγραφές που ο δείκτης δεν είχε δει."
+      more={<>Ο δείκτης μετρά <b>περιβαλλοντική καταλληλότητα</b>, όχι αφθονία. Τον συγκρίνουμε με πραγματικές καταγραφές: εβδομαδιαίες παγίδες στην Αθήνα (2018–2019), καταγραφές παρουσίας σε όλη την Ελλάδα (GBIF) και παγίδες στη Θεσσαλία. Τα βάρη επιλέχθηκαν με δεδομένα ως το 2018 και ελέγχθηκαν σε μεταγενέστερα, χωρίς διαρροή πληροφορίας.</>}>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat label="Αθήνα 2019 (δεν χρησιμοποιήθηκε στη βαθμονόμηση)" value={nf(cal.chosen.rho_test, 2)} note={<>Spearman ρ, ESI έναντι εβδομαδιαίων αλιευμάτων · ίσα βάρη <span className="num">{nf(cal.equal.rho_test as number, 2)}</span></>} />
         <Stat label="Νέες περιοχές εμφάνισης από 2019" value={nf(cal.chosen.auc_test, 2)} note={<>AUC (0,5 = τύχη) · ίσα βάρη <span className="num">{nf(cal.equal.auc_test as number, 2)}</span></>} />
@@ -104,8 +105,26 @@ export default function ValidationPage() {
         </Card>
       </div>
 
-      <Card title="Ανάλυση ευαισθησίας" sub="Πόσο αλλάζουν τα συμπεράσματα αν αλλάξουν τα βάρη, οι παράμετροι των συναρτήσεων ή ο τρόπος συνδυασμού">
-        <div className="overflow-auto">
+      <Card title="Ανάλυση ευαισθησίας" sub="Τι αλλάζει αν αλλάξουν τα βάρη, οι καμπύλες ή ο τρόπος συνδυασμού">
+        {(() => {
+          const vs = d.sensitivity.variants
+          const withTrend = vs.filter((r) => r.trend_decade != null)
+          const up = withTrend.filter((r) => (r.trend_decade ?? 0) > 0).length
+          const withProj = vs.filter((r) => r.d2050_ssp245 != null)
+          const projUp = withProj.filter((r) => (r.d2050_ssp245 ?? 0) > 0).length
+          const exceptions = withProj.filter((r) => (r.d2050_ssp245 ?? 0) <= 0).map((r) => variantName(r.variant))
+          const mc = d.sensitivity.monte_carlo_weights.esi_2016_2025_p05_p95
+          return (
+            <div className="grid sm:grid-cols-3 gap-4 mb-3">
+              <div><div className="num text-[28px] font-semibold">{up}/{withTrend.length}</div><div className="text-[13px] text-soft">παραλλαγές δείχνουν άνοδο από το 2001</div></div>
+              <div><div className="num text-[28px] font-semibold">{projUp}/{withProj.length}</div><div className="text-[13px] text-soft">δείχνουν άνοδο ως το 2041–2050 (ενδιάμεσο σενάριο){exceptions.length ? <> · εξαίρεση: {exceptions.join(", ")}</> : null}</div></div>
+              <div><div className="num text-[28px] font-semibold">{nf(mc[0], 1)}–{nf(mc[1], 1)}</div><div className="text-[13px] text-soft">καταλληλότητα 2016–2025 με 300 τυχαία σύνολα βαρών (5–95%)</div></div>
+            </div>
+          )
+        })()}
+        <details>
+          <summary className="cursor-pointer text-[13.5px] text-soft hover:text-fg select-none">Όλες οι παραλλαγές ({d.sensitivity.variants.length})</summary>
+        <div className="overflow-auto mt-2">
           <table className="tbl">
             <thead><tr><th>Παραλλαγή</th><th>ESI 2016–2025</th><th>Τάση /10 έτη</th><th>p</th><th>Δ 2041–2050 SSP2-4.5</th><th>Δ SSP5-8.5</th><th>ρ Αθήνα 2019</th></tr></thead>
             <tbody>{d.sensitivity.variants.map((r) => (
@@ -114,7 +133,8 @@ export default function ValidationPage() {
             ))}</tbody>
           </table>
         </div>
-        <div className="text-[12.5px] text-soft mt-2">300 τυχαίοι συνδυασμοί βαρών γύρω από τα κύρια (Dirichlet): ESI 2016–2025 από <span className="num">{nf(d.sensitivity.monte_carlo_weights.esi_2016_2025_p05_p95[0], 1)}</span> έως <span className="num">{nf(d.sensitivity.monte_carlo_weights.esi_2016_2025_p05_p95[1], 1)}</span> (5–95%). Η <b>κατεύθυνση</b> (άνοδος) μένει ίδια σχεδόν σε όλες τις παραλλαγές, ενώ το μέγεθος εξαρτάται κυρίως από το πόσο μετράει η ξηρασία του καλοκαιριού.</div>
+        </details>
+        <div className="text-[13px] text-soft mt-3">Η <b>κατεύθυνση</b> (άνοδος) μένει ίδια σχεδόν σε όλες τις παραλλαγές. Το μέγεθος εξαρτάται κυρίως από το πόσο μετράει η ξηρασία του καλοκαιριού.</div>
       </Card>
 
       <Card title="Δοκίμασε τα δικά σου βάρη" sub="Ο υπολογισμός γίνεται στο backend πάνω σε όλα τα κελιά, τους μήνες και τα 8 μοντέλα">

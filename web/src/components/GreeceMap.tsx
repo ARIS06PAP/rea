@@ -28,6 +28,7 @@ type Props = {
   tooltip?: (cell: string, v: number | null) => string
   height?: number | string
   cities?: boolean
+  highlight?: { cell: string; color: string }[]   // coloured outlines (e.g. place A and place B)
 }
 
 type FC = { type: 'FeatureCollection'; features: { type: 'Feature'; properties: Record<string, unknown> | null; geometry: unknown }[] }
@@ -43,7 +44,7 @@ function hatch(): ImageData {
   return g.getImageData(0, 0, s, s)
 }
 
-export default function GreeceMap({ values, palette, domain, selected = [], onSelect, forecast = false, tooltip, height = 520, cities = true }: Props) {
+export default function GreeceMap({ values, palette, domain, selected = [], onSelect, forecast = false, tooltip, height = 520, cities = true, highlight }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const mapRef = useRef<maplibregl.Map | null>(null)
   const [ready, setReady] = useState(false)
@@ -92,7 +93,7 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
       setReady(true)
     })
     if (cities) {
-      const narrow = box.current.clientWidth < 560   // phones: drop labels that collide with a neighbour
+      const narrow = box.current.clientWidth < 820   // small maps and phones: drop labels that collide with a neighbour
       for (const [name, lat, lon] of CITIES) {
         if (narrow && MINOR_CITIES.has(name)) continue
         const el = document.createElement('div')
@@ -120,10 +121,14 @@ export default function GreeceMap({ values, palette, domain, selected = [], onSe
   useEffect(() => {
     const map = mapRef.current
     if (!map || !ready) return
-    map.setFilter('sel', ['in', ['get', 'cell'], ['literal', selected]])
+    const hl = (highlight ?? selected.map((cell) => ({ cell, color: '#ffffff' })))
+      .filter((h, i, all) => all.findIndex((x) => x.cell === h.cell) === i)
+    map.setFilter('sel', ['in', ['get', 'cell'], ['literal', hl.map((h) => h.cell)]])
+    map.setPaintProperty('sel', 'line-color', hl.length ? ['match', ['get', 'cell'], ...hl.flatMap((h) => [h.cell, h.color]), '#ffffff'] as never : '#ffffff')
+    map.setPaintProperty('sel', 'line-width', highlight ? 3 : 2.2)
     map.setLayoutProperty('hatch', 'visibility', forecast ? 'visible' : 'none')
     map.setLayoutProperty('edge-fc', 'visibility', forecast ? 'visible' : 'none')
-  }, [selected, forecast, ready])
+  }, [selected, forecast, ready, highlight])
 
   return <div ref={box} style={{ height, width: '100%' }} className="rounded-lg overflow-hidden border border-line" />
 }

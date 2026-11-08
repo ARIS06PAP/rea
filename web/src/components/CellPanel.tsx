@@ -17,7 +17,7 @@ type CellResp = {
 
 export const cellName = (c: { lat: number; lon: number; region: string }) => `${c.region} · ${nf(c.lat, 2)}°Β ${nf(c.lon, 2)}°Α`
 
-export default function CellPanel({ id, meta, onClose }: { id: string; meta: Meta; onClose?: () => void }) {
+export default function CellPanel({ id, meta, onClose, bare = false }: { id: string; meta: Meta; onClose?: () => void; bare?: boolean }) {
   const { data, error } = useApi<CellResp>(`/api/cell/${id}`)
   if (error) return <div className="text-sm text-up">{error}</div>
   if (!data) return <div className="text-sm text-muted py-6">Φόρτωση κελιού…</div>
@@ -42,6 +42,7 @@ export default function CellPanel({ id, meta, onClose }: { id: string; meta: Met
   const snap = (s: string) => data.snapshots.find((x) => x.scenario === s && x.snapshot === 2050)
   return (
     <div className="flex flex-col gap-4">
+      {!bare && <>
       <div className="flex items-start gap-3">
         <div>
           <div className="eyebrow">Επιλεγμένο κελί</div>
@@ -65,6 +66,10 @@ export default function CellPanel({ id, meta, onClose }: { id: string; meta: Met
           <div className="text-[12px] text-soft">ανά δεκαετία · {tr('ESI')?.sig_fdr ? 'σίγουρη (FDR)' : 'όχι σίγουρη'}</div>
         </div>
       </div>
+      </>}
+      {bare && <div className="flex flex-wrap gap-1.5 text-[11.5px]">
+        {[c.north ? 'Βόρεια Ελλάδα' : 'Νότια Ελλάδα', c.island ? 'Νησιωτική' : 'Ηπειρωτική', c.coastal ? 'Παράκτια' : 'Εσωτερική', c.urban_class, `υψόμετρο ${c.elev_class}`].map((t) => <span key={t} className="tag">{t}</span>)}
+      </div>}
       <div>
         <div className="text-[12.5px] text-muted mb-2">Καταλληλότητα κάθε παράγοντα (0–1, μέσος όρος μηνών 2016–2025) και βάρος στον ESI</div>
         <ScoreBars scores={scores} />

@@ -36,8 +36,9 @@ export default function HistoryPage() {
   const tEarly = clim('T2M', 1981, 1990), tLate = clim('T2M', 2016, 2025)
   const regions = [...n.regions].sort((a, b) => (b.change ?? 0) - (a.change ?? 0))
   return (
-    <Page eyebrow="Ιστορική εξέλιξη" title="Πώς άλλαξαν οι συνθήκες από το 1981"
-      lead="Οι πέντε παράμετροι από το 1981 και ο ESI από το 2001, για όλη την Ελλάδα. Τάσεις με Mann-Kendall (διόρθωση Hamed-Rao για αυτοσυσχέτιση), κλίση Sen, γραμμική παλινδρόμηση με σφάλματα Newey-West και έλεγχο Benjamini-Hochberg για τους πολλούς ελέγχους.">
+    <Page eyebrow="Ιστορικό" title="Πώς άλλαξαν οι συνθήκες από το 1981"
+      lead="Οι πέντε παράμετροι από το 1981 και η καταλληλότητα από το 2001: τι άλλαξε, πού και πόσο σίγουρα."
+      more="Τάσεις με Mann-Kendall (διόρθωση Hamed-Rao για αυτοσυσχέτιση), κλίση Sen, γραμμική παλινδρόμηση με σφάλματα Newey-West και έλεγχο Benjamini-Hochberg για τους πολλούς ελέγχους. «Σίγουρη» τάση = περνά αυτόν τον έλεγχο.">
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {VARS.map((v) => {
           const t = n.trends[v]

@@ -1,4 +1,4 @@
-"""TigerWatch API – FastAPI over the DuckDB database built by the pipeline.
+"""R.E.A. API – FastAPI over the DuckDB database built by the pipeline.
 
 Run locally (from rea/tiger):  .venv/Scripts/python.exe -m uvicorn api.main:app --port 8010
 Then open http://localhost:8010 (the built web app is served from web/dist) or use /docs.
@@ -48,7 +48,7 @@ class SafeJSON(JSONResponse):
         return json.dumps(_san(content), ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
-app = FastAPI(default_response_class=SafeJSON, title="TigerWatch API", description="Περιβαλλοντική καταλληλότητα του Aedes albopictus στην Ελλάδα", version="1.0")
+app = FastAPI(default_response_class=SafeJSON, title="R.E.A. API", description="Περιβαλλοντική καταλληλότητα του Aedes albopictus στην Ελλάδα", version="1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
 _con = duckdb.connect(str(DB), read_only=True)
 
@@ -248,9 +248,124 @@ def national():
         vals = [r["ESI"] for r in nat if a <= r["year"] <= b and r["ESI"] is not None]
         periods[name] = float(np.mean(vals)) if vals else None
     base = q("SELECT avg(ESI) v FROM proj_baseline")[0]["v"]
+    # Greece-wide change 2041–2050 vs the 1995–2014 climate (land-weighted mean of the cells' median change)
+    ch = q("""SELECT s.scenario, sum(s.dESI * c.gr_land) / sum(c.gr_land) d, avg(CASE WHEN s.dESI > 0 THEN 1.0 ELSE 0.0 END) share_up
+              FROM proj_snapshots s JOIN cells c USING (cell) WHERE s.snapshot = 2050 AND s.month = 0 GROUP BY s.scenario""")
     return {"annual": nat, "monthly": natm, "trends": trends, "regions": reg_now, "cells_ranked": cells_now, "projections": proj,
             "periods": periods, "last_complete_year": ly, "last_month": {"year": last_month()[0], "month": last_month()[1]},
-            "projection_baseline_unweighted": base}
+            "projection_baseline_unweighted": base,
+            "change_2050": {r["scenario"]: {"change": r["d"], "share_up": r["share_up"]} for r in ch}}
+
+
+# ------------------------------------------------------------------ places (cities) and one-place summaries
+# Greek cities (name, lat, lon). Each one is matched to the grid cell that contains it, or to the
+# nearest cell when its own cell has too little Greek land to be in the grid (small islands).
+CITIES: list[tuple[str, float, float]] = [
+    ("Αθήνα", 37.98, 23.73), ("Θεσσαλονίκη", 40.64, 22.94), ("Πάτρα", 38.25, 21.73), ("Ηράκλειο", 35.34, 25.13),
+    ("Λάρισα", 39.64, 22.42), ("Βόλος", 39.36, 22.94), ("Ιωάννινα", 39.66, 20.85), ("Τρίκαλα", 39.55, 21.77),
+    ("Χαλκίδα", 38.46, 23.60), ("Σέρρες", 41.09, 23.55), ("Αλεξανδρούπολη", 40.85, 25.87), ("Ξάνθη", 41.14, 24.89),
+    ("Κομοτηνή", 41.12, 25.40), ("Καβάλα", 40.94, 24.41), ("Δράμα", 41.15, 24.15), ("Κατερίνη", 40.27, 22.50),
+    ("Βέροια", 40.52, 22.20), ("Έδεσσα", 40.80, 22.05), ("Κιλκίς", 40.99, 22.87), ("Πολύγυρος", 40.38, 23.44),
+    ("Κοζάνη", 40.30, 21.79), ("Φλώρινα", 40.78, 21.41), ("Καστοριά", 40.52, 21.27), ("Γρεβενά", 40.08, 21.43),
+    ("Καρδίτσα", 39.36, 21.92), ("Λαμία", 38.90, 22.43), ("Άμφισσα", 38.53, 22.38), ("Λιβαδειά", 38.44, 22.88),
+    ("Θήβα", 38.32, 23.32), ("Καλαμάτα", 37.04, 22.11), ("Τρίπολη", 37.51, 22.38), ("Σπάρτη", 37.07, 22.43),
+    ("Κόρινθος", 37.94, 22.93), ("Ναύπλιο", 37.57, 22.80), ("Πύργος", 37.67, 21.44), ("Αγρίνιο", 38.62, 21.41),
+    ("Μεσολόγγι", 38.37, 21.43), ("Άρτα", 39.16, 20.99), ("Πρέβεζα", 38.96, 20.75), ("Ηγουμενίτσα", 39.50, 20.27),
+    ("Κέρκυρα", 39.62, 19.92), ("Λευκάδα", 38.83, 20.71), ("Αργοστόλι", 38.18, 20.49), ("Ζάκυνθος", 37.79, 20.90),
+    ("Χανιά", 35.51, 24.02), ("Ρέθυμνο", 35.37, 24.47), ("Άγιος Νικόλαος", 35.19, 25.72), ("Ιεράπετρα", 35.01, 25.74),
+    ("Μυτιλήνη", 39.11, 26.55), ("Χίος", 38.37, 26.14), ("Σάμος", 37.76, 26.98), ("Ρόδος", 36.43, 28.22),
+    ("Κως", 36.89, 27.29), ("Ερμούπολη (Σύρος)", 37.44, 24.94), ("Νάξος", 37.10, 25.38), ("Θήρα (Σαντορίνη)", 36.42, 25.43),
+    ("Μύρινα (Λήμνος)", 39.87, 25.06),
+]
+FAVOURABLE = 45.0      # monthly ESI from which conditions count as «ευνοϊκές» (same word scale as the UI)
+
+
+def _km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    p = math.pi / 180
+    a = math.sin((lat2 - lat1) * p / 2) ** 2 + math.cos(lat1 * p) * math.cos(lat2 * p) * math.sin((lon2 - lon1) * p / 2) ** 2
+    return 12742 * math.asin(math.sqrt(a))
+
+
+@lru_cache(maxsize=1)
+def places_list() -> list[dict]:
+    import unicodedata
+    cells = q("SELECT cell, lat, lon, region FROM cells")
+    out = []
+    for name, lat, lon in CITIES:
+        inside = [c for c in cells if abs(c["lat"] - lat) <= 0.25 and abs(c["lon"] - lon) <= 0.3125]
+        best = inside[0] if inside else min(cells, key=lambda c: _km(lat, lon, c["lat"], c["lon"]))
+        d = _km(lat, lon, best["lat"], best["lon"])
+        if d > 60:      # too far from any grid cell to stand for the city
+            continue
+        out.append({"name": name, "lat": lat, "lon": lon, "cell": best["cell"], "region": best["region"],
+                    "inside": bool(inside), "km": round(d)})
+    key = lambda s: "".join(ch for ch in unicodedata.normalize("NFD", s) if not unicodedata.combining(ch)).lower()
+    return sorted(out, key=lambda p: key(p["name"]))
+
+
+@app.get("/api/places")
+def places():
+    """Greek cities with the grid cell that represents each one."""
+    return places_list()
+
+
+def _season(values: list) -> dict:
+    months = [i + 1 for i, v in enumerate(values) if v is not None and v >= FAVOURABLE]
+    return {"n": len(months), "months": months}
+
+
+@app.get("/api/summary/{cell}")
+def summary(cell: str):
+    """Everything the place and comparison views need for one cell, in plain quantities:
+    suitability now and before, favourable months, trend, 2050 per scenario, the five factors and the
+    climate in everyday units. Observed periods: 2001–2010 and 2016–2025 (monthly climatologies),
+    the last five complete years for the headline value; projections: 2041–2050 decade means."""
+    c = q("SELECT * FROM cells WHERE cell = ?", cell)
+    if not c:
+        raise HTTPException(404, "unknown cell")
+    ly = last_complete_year()
+    ann = q("SELECT year, ESI, T2M, PRECIP FROM annual WHERE cell = ? AND complete_year ORDER BY year", cell)
+    now = [r["ESI"] for r in ann if ly - 4 <= r["year"] <= ly and r["ESI"] is not None]
+    early = [r["ESI"] for r in ann if 2001 <= r["year"] <= 2010 and r["ESI"] is not None]
+    allnow = [r["v"] for r in q("SELECT avg(ESI) v FROM annual WHERE year BETWEEN ? AND ? GROUP BY cell", ly - 4, ly)]
+    esi_now = float(np.mean(now)) if now else None
+    pct = None if esi_now is None else round(100 * sum(v < esi_now for v in allnow) / len(allnow))
+    clim = q("""SELECT month,
+                avg(CASE WHEN year BETWEEN 2001 AND 2010 THEN ESI END) e_early, avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN ESI END) e_now,
+                avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN T2M END) t, avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN RH2M END) rh,
+                avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN WS10M END) w, avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN NDVI END) ndvi,
+                avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN sT END) sT, avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN sP END) sP,
+                avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN sRH END) sRH, avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN sW END) sW,
+                avg(CASE WHEN year BETWEEN 2016 AND 2025 THEN sNDVI END) sNDVI
+             FROM monthly WHERE cell = ? GROUP BY month ORDER BY month""", cell)
+    rain = q("SELECT avg(PRECIP) v FROM annual WHERE cell = ? AND complete_year AND year BETWEEN 2016 AND 2025", cell)[0]["v"]
+    proj_m = q("SELECT scenario, month, ESI, ESI_p10, ESI_p90, dESI, agree_up, n_models FROM proj_snapshots WHERE cell = ? AND snapshot = 2050 ORDER BY scenario, month", cell)
+    proj = {}
+    for sc in ("ssp245", "ssp585"):
+        rows = [r for r in proj_m if r["scenario"] == sc]
+        yr = next((r for r in rows if r["month"] == 0), None)
+        monthly = [next((r["ESI"] for r in rows if r["month"] == m), None) for m in range(1, 13)]
+        proj[sc] = {"esi": yr and yr["ESI"], "p10": yr and yr["ESI_p10"], "p90": yr and yr["ESI_p90"], "change": yr and yr["dESI"],
+                    "agree_up": yr and yr["agree_up"], "n_models": yr and yr["n_models"], "monthly": monthly, "season": _season(monthly)}
+    tr = {r["var"]: {"sen_decade": r["sen_decade"], "ci": [r["ci_lo"], r["ci_hi"]], "p": r["p_mk"], "significant": bool(r["sig_fdr"]),
+                     "first": r["first"], "last": r["last"]}
+          for r in q("SELECT var, sen_decade, ci_lo, ci_hi, p_mk, sig_fdr, first, last FROM trends_annual WHERE cell = ? AND var IN ('ESI', 'T2M')", cell)}
+    e_early = [r["e_early"] for r in clim]
+    e_now = [r["e_now"] for r in clim]
+    mean = lambda k: float(np.nanmean([r[k] if r[k] is not None else np.nan for r in clim]))
+    return {
+        "cell": c[0], "period_now": f"{ly - 4}–{ly}", "esi_now": esi_now, "esi_early": float(np.mean(early)) if early else None,
+        "percentile": pct,
+        "season": {"early": _season(e_early), "now": _season(e_now)},
+        "monthly": {"early": e_early, "now": e_now},
+        "trend": tr.get("ESI"), "t_trend": tr.get("T2M"),
+        "proj": proj,
+        "factors": {k: mean(k) for k in ("sT", "sP", "sRH", "sW", "sNDVI")},
+        "climate": {"t_year": mean("t"), "t_jan": clim[0]["t"], "t_jul": clim[6]["t"], "rain_year": rain, "rh": mean("rh"), "wind": mean("w"),
+                    "ndvi": mean("ndvi")},
+        "annual": [{"year": r["year"], "v": r["ESI"]} for r in ann if r["ESI"] is not None],
+        "favourable_threshold": FAVOURABLE,
+    }
 
 
 GROUPINGS = [   # (key, label, SQL expression over cells c) — descriptors only, never model inputs

@@ -62,3 +62,22 @@ export function ScoreBars({ scores }: { scores: { label: string; value: number |
     </div>
   )
 }
+
+// Monthly profile lines (Jan–Dec) for one or more places, with an optional horizontal threshold.
+export function MonthLines({ data, series, height = 240, digits = 0, threshold, yDomain }:
+  { data: Record<string, unknown>[]; series: SeriesDef[]; height?: number; digits?: number; threshold?: { y: number; label: string }; yDomain?: [number, number] }) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <ComposedChart data={data} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
+        <CartesianGrid stroke="#1c2433" vertical={false} />
+        <XAxis dataKey="label" {...AX} interval={0} />
+        <YAxis {...AX} width={36} domain={yDomain ?? [0, 'auto']} />
+        <Tooltip {...TT} formatter={(v: unknown) => nf(v as number, digits)} />
+        {threshold && <ReferenceArea y1={threshold.y} y2={100} ifOverflow="hidden" fill="#f5a524" fillOpacity={0.07} />}
+        {threshold && <ReferenceLine y={threshold.y} stroke="#f5a524" strokeDasharray="4 4" label={{ value: threshold.label, fill: '#ffcf70', fontSize: 11, position: 'insideTopLeft' }} />}
+        {series.map((s) => <Line key={s.key} dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={s.width ?? 2.4} dot={{ r: 2.5 }} strokeDasharray={s.dashed ? '5 4' : undefined} connectNulls isAnimationActive={false} />)}
+        {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12, color: '#b5bfcf' }} />}
+      </ComposedChart>
+    </ResponsiveContainer>
+  )
+}

@@ -1,4 +1,4 @@
-# Οδηγός ομάδας: πώς δουλεύουμε το TigerWatch
+# Οδηγός ομάδας: πώς δουλεύουμε το R.E.A.
 
 Live εφαρμογή (δημόσια): **https://rea-tau-seven.vercel.app**
 Τι κάνει και πώς είναι φτιαγμένη: [README.md](README.md). Εδώ είναι μόνο τα πρακτικά.
@@ -7,13 +7,13 @@ Live εφαρμογή (δημόσια): **https://rea-tau-seven.vercel.app**
 
 Χρειάζεσαι: Git, Python 3.12, Node 20 ή νεότερο. Το repo είναι δημόσιο, άρα το `git clone` δουλεύει χωρίς λογαριασμό. Για να στείλεις αλλαγές χρειάζεσαι λογαριασμό GitHub (δωρεάν στο github.com/signup) και έναν από τους δύο δρόμους:
 - στέλνεις το username σου στον Άρη, σε προσθέτει, και κάνεις push σε δικό σου branch (ενότητα 3)·
-- ή, χωρίς πρόσκληση: **Fork** στη σελίδα του repo, αλλαγές στο δικό σου αντίγραφο, και μετά pull request προς το `ARIS06PAP/tigerwatch`.
+- ή, χωρίς πρόσκληση: **Fork** στη σελίδα του repo, αλλαγές στο δικό σου αντίγραφο, και μετά pull request προς το `ARIS06PAP/rea`.
 
 Στα Windows, αν η εντολή `python` ανοίγει το Microsoft Store, γράψε `py -3.12` στη θέση της.
 
 ```bash
-git clone https://github.com/ARIS06PAP/tigerwatch.git
-cd tigerwatch
+git clone https://github.com/ARIS06PAP/rea.git
+cd rea
 
 # backend (FastAPI + DuckDB)
 python -m venv .venv
@@ -36,7 +36,8 @@ python -m uvicorn api.main:app --port 8010
 
 | Θέλω να αλλάξω… | Αρχείο |
 |---|---|
-| Κείμενα και διάταξη μιας σελίδας | `web/src/pages/*.tsx` (Dashboard, MapPage, ParamsPage, HistoryPage, FuturePage, ValidationPage, SciencePage) |
+| Κείμενα και διάταξη μιας σελίδας | `web/src/pages/*.tsx` (Dashboard, MapPage, ComparePage, ParamsPage, HistoryPage, FuturePage, ValidationPage, SciencePage) |
+| Λίστα πόλεων για τη σύγκριση | `api/main.py` (`CITIES`) |
 | Μενού, header, footer | `web/src/components/Layout.tsx` |
 | Χρώματα χαρτών, ονόματα παραμέτρων, μορφή αριθμών | `web/src/fmt.ts` |
 | Χάρτη (πόλεις, υπόβαθρο) | `web/src/components/GreeceMap.tsx` |

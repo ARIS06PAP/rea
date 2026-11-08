@@ -4,9 +4,24 @@ import { useApi, type Meta } from '../api'
 import { MONTHS_LONG } from '../fmt'
 
 const NAV = [
-  ['/', 'Επισκόπηση'], ['/map', 'Χάρτης'], ['/parameters', 'Παράμετροι'], ['/history', 'Ιστορική εξέλιξη'],
-  ['/future', 'Προβλέψεις 2050'], ['/validation', 'Αφθονία & επικύρωση'], ['/science', 'Τεκμηρίωση'],
+  ['/', 'Αρχική'], ['/map', 'Χάρτης'], ['/compare', 'Σύγκριση'], ['/parameters', 'Παράμετροι'], ['/history', 'Ιστορικό'],
+  ['/future', '2050'], ['/validation', 'Επικύρωση'], ['/science', 'Μέθοδος'],
 ] as const
+
+export function Logo({ size = 30 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <defs>
+        <radialGradient id="rea-planet" cx=".35" cy=".35" r=".75">
+          <stop offset="0" stopColor="#a9d6ff" /><stop offset=".55" stopColor="#22528f" /><stop offset="1" stopColor="#0a1a33" />
+        </radialGradient>
+      </defs>
+      <circle cx="16" cy="16" r="7.5" fill="url(#rea-planet)" />
+      <ellipse cx="16" cy="16" rx="14" ry="5" transform="rotate(-24 16 16)" fill="none" stroke="#6fb7ff" strokeOpacity=".75" strokeWidth="1" />
+      <circle cx="28.2" cy="10.9" r="1.6" fill="#e6ecf5" />
+    </svg>
+  )
+}
 
 export default function Layout() {
   const { data: meta } = useApi<Meta>('/api/meta')
@@ -14,23 +29,23 @@ export default function Layout() {
   return (
     <div className="min-h-full flex flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur">
-        <div className="mx-auto max-w-[1400px] px-4 h-14 flex items-center gap-6">
-          <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
-            <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden><circle cx="16" cy="16" r="14" fill="none" stroke="#f5a524" strokeWidth="2" /><path d="M9 16h14M16 9v14" stroke="#f5a524" strokeWidth="2" /><circle cx="16" cy="16" r="4" fill="#f5a524" /></svg>
+        <div className="mx-auto max-w-[1400px] px-4 h-14 flex items-center gap-8">
+          <NavLink to="/" className="flex items-center gap-2.5 shrink-0" aria-label="R.E.A. αρχική">
+            <Logo />
             <div className="leading-tight">
-              <div className="font-semibold tracking-wide text-[15px]">TigerWatch <span className="text-muted font-normal">Ελλάδα</span></div>
-              <div className="text-[10.5px] text-muted">Aedes albopictus · NASA data</div>
+              <div className="font-bold tracking-[0.2em] text-[15px]">R.E.A.</div>
+              <div className="text-[10.5px] text-muted">Κουνούπι τίγρη · Ελλάδα</div>
             </div>
           </NavLink>
-          <nav className="hidden lg:flex items-center gap-1 text-[13.5px]">
+          <nav className="hidden lg:flex items-stretch gap-6 h-full text-[14px]" aria-label="Κύρια πλοήγηση">
             {NAV.map(([to, label]) => (
-              <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `px-3 py-1.5 rounded-md transition ${isActive ? 'text-fg bg-panel-2' : 'text-muted hover:text-fg'}`}>{label}</NavLink>
+              <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `flex items-center border-b-2 pt-0.5 transition ${isActive ? 'text-fg border-accent' : 'text-muted border-transparent hover:text-fg'}`}>{label}</NavLink>
             ))}
           </nav>
-          <div className="ml-auto hidden md:block text-[11.5px] text-muted text-right">
-            {meta && <>Τελευταίος μήνας δεδομένων: <span className="text-soft">{MONTHS_LONG[meta.last_month.month]} {meta.last_month.year}</span></>}
+          <div className="ml-auto hidden xl:block text-[11.5px] text-muted text-right">
+            {meta && <>Δεδομένα ως: <span className="text-soft">{MONTHS_LONG[meta.last_month.month]} {meta.last_month.year}</span></>}
           </div>
-          <button className="lg:hidden btn" onClick={() => setOpen(!open)} aria-label="Μενού">☰</button>
+          <button className="lg:hidden btn ml-auto" onClick={() => setOpen(!open)} aria-label="Μενού">☰</button>
         </div>
         {open && (
           <nav className="lg:hidden border-t border-line px-4 py-2 flex flex-col">
@@ -41,21 +56,28 @@ export default function Layout() {
       <main className="flex-1 mx-auto w-full max-w-[1400px] px-4 py-6"><Outlet /></main>
       <footer className="border-t border-line text-[11.5px] text-muted">
         <div className="mx-auto max-w-[1400px] px-4 py-4 flex flex-wrap gap-x-6 gap-y-1">
-          <span>Δεδομένα: NASA POWER (MERRA-2) · NASA MODIS MOD13A3 · NASA NEX-GDDP-CMIP6 · GBIF · LIFE CONOPS (Zenodo) · Ecodevelopment (Mendeley Data)</span>
-          <span>Ο δείκτης δείχνει περιβαλλοντική καταλληλότητα, όχι αριθμό κουνουπιών ή κρούσματα.</span>
+          <span><b className="text-soft tracking-[0.15em]">R.E.A.</b> · NASA Space Apps 2026</span>
+          <span>Δεδομένα: NASA POWER · MODIS · NEX-GDDP-CMIP6 · GBIF · παγίδες LIFE CONOPS, Ecodevelopment</span>
+          <span>Δείχνει καταλληλότητα, όχι κουνούπια ή κρούσματα.</span>
         </div>
       </footer>
     </div>
   )
 }
 
-export function Page({ eyebrow, title, lead, children }: { eyebrow: string; title: string; lead?: React.ReactNode; children: React.ReactNode }) {
+export function Page({ eyebrow, title, lead, more, children }: { eyebrow: string; title: string; lead?: React.ReactNode; more?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-5">
       <div>
         <div className="eyebrow">{eyebrow}</div>
-        <h1 className="text-2xl md:text-[28px] font-semibold mt-1 tracking-tight">{title}</h1>
-        {lead && <p className="text-soft mt-2 max-w-3xl leading-relaxed text-[14.5px]">{lead}</p>}
+        <h1 className="text-2xl md:text-[30px] font-semibold mt-1 tracking-tight">{title}</h1>
+        {lead && <p className="text-soft mt-2 max-w-3xl leading-relaxed text-[15px]">{lead}</p>}
+        {more && (
+          <details className="mt-2 max-w-3xl text-[13px] text-muted">
+            <summary className="cursor-pointer hover:text-soft select-none">Πώς το μετράμε</summary>
+            <div className="mt-1.5 leading-relaxed">{more}</div>
+          </details>
+        )}
       </div>
       {children}
     </div>

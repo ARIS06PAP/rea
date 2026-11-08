@@ -4,7 +4,7 @@ import { Card, ErrorBox, Loading, Page } from '../components/Layout'
 import { nf } from '../fmt'
 
 type Sci = {
-  values: { id: number | string; parameter: string; value_text: string; category: string; context: string; quote: string; citation: string; doi: string | null; url: string; verified: string; notes: string }[]
+  values: { id: number | string; parameter: string; value_text: string; short_el?: string; category: string; context: string; quote: string; citation: string; doi: string | null; url: string; verified: string; notes: string }[]
   esi_parameters: { P: Record<string, number>; weights: Record<string, number>; equal: Record<string, number> }
   notes: { note: string; P_notes?: Record<string, string> }
 }
@@ -51,8 +51,9 @@ export default function SciencePage() {
   const W = ep.weights
   const cov = meta.data?.coverage
   return (
-    <Page eyebrow="Επιστημονική τεκμηρίωση" title="Από πού προέρχεται κάθε τιμή και πώς χρησιμοποιείται"
-      lead="Κάθε επιστημονική τιμή επαληθεύτηκε στην πρωτογενή δημοσίευση. Διακρίνουμε εργαστηριακές τιμές, παρατηρήσεις πεδίου, αποτελέσματα μοντέλων και προτεινόμενα κλιματικά όρια. Καμία δεν παρουσιάζεται ως απόλυτο όριο επιβίωσης.">
+    <Page eyebrow="Μέθοδος" title="Από πού έρχεται κάθε τιμή"
+      lead="Ο δείκτης, οι πηγές κάθε τιμής, τα δεδομένα και τα όρια του μοντέλου."
+      more="Κάθε επιστημονική τιμή επαληθεύτηκε στην πρωτογενή δημοσίευση. Διακρίνουμε εργαστηριακές τιμές, παρατηρήσεις πεδίου, αποτελέσματα μοντέλων και προτεινόμενα κλιματικά όρια. Καμία δεν παρουσιάζεται ως απόλυτο όριο επιβίωσης.">
       <Card title="Ο δείκτης ESI" sub="Environmental Suitability Index, 0–100">
         <div className="text-[14px] leading-relaxed text-soft">
           <div className="num text-fg bg-panel-2 border border-line rounded-md px-3 py-2 inline-block">ESI = 100 · s<sub>T</sub><sup>w<sub>T</sub></sup> · s<sub>P</sub><sup>w<sub>P</sub></sup> · s<sub>RH</sub><sup>w<sub>RH</sub></sup> · s<sub>W</sub><sup>w<sub>W</sub></sup> · s<sub>NDVI</sub><sup>w<sub>NDVI</sub></sup>,&nbsp; Σw = 1</div>
@@ -85,7 +86,7 @@ export default function SciencePage() {
             <tbody>{values.map((r) => (
               <tr key={r.id}>
                 <td className="num">{r.id}</td><td>{PAR[r.parameter] ?? r.parameter}</td>
-                <td className="max-w-[460px]"><div>{r.value_text}</div><div className="text-[12px] text-muted mt-1">{r.notes}</div></td>
+                <td className="max-w-[520px]"><div className="text-[13.5px]">{r.short_el ?? r.value_text}</div><details className="mt-1"><summary className="text-[12px] text-muted cursor-pointer select-none hover:text-soft">Αρχικό κείμενο και σημειώσεις</summary><div className="text-[12px] text-soft mt-1">{r.value_text}</div>{r.notes && <div className="text-[12px] text-muted mt-1">{r.notes}</div>}</details></td>
                 <td><span className={`tag ${CAT[r.category]?.[1] ?? ''}`}>{CAT[r.category]?.[0] ?? r.category}</span></td>
                 <td>{r.verified === 'yes' ? 'ναι' : r.verified === 'partly' ? 'μερικώς' : 'όχι'}</td>
                 <td className="text-[12px]"><div className="text-soft">{r.citation}</div><div className="flex flex-wrap gap-x-2">{r.doi && <a className="text-accent underline-offset-2 hover:underline" href={`https://doi.org/${r.doi}`} target="_blank" rel="noreferrer">doi:{r.doi}</a>}{r.url && <a className="text-accent underline-offset-2 hover:underline" href={r.url} target="_blank" rel="noreferrer">σύνδεσμος</a>}</div></td>

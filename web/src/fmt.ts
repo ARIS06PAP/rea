@@ -9,8 +9,8 @@ export const MONTHS = ['Ετήσιο', 'Ιαν', 'Φεβ', 'Μαρ', 'Απρ', '
 export const MONTHS_LONG = ['Όλο το έτος', 'Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος']
 
 export const LAYER_INFO: Record<string, { label: string; short: string; unit: string; digits: number; palette: string[]; domain?: [number, number] }> = {
-  ESI: { label: 'Δείκτης καταλληλότητας ESI', short: 'ESI', unit: '/100', digits: 0, palette: ['#1b1036', '#3b0f70', '#8c2981', '#de4968', '#fe9f6d', '#fcfdbf'], domain: [0, 80] },
-  ESI_eq: { label: 'ESI με ίσα βάρη', short: 'ESI (ίσα βάρη)', unit: '/100', digits: 0, palette: ['#1b1036', '#3b0f70', '#8c2981', '#de4968', '#fe9f6d', '#fcfdbf'], domain: [0, 80] },
+  ESI: { label: 'Καταλληλότητα (ESI)', short: 'Καταλληλότητα', unit: '/100', digits: 0, palette: ['#1b1036', '#3b0f70', '#8c2981', '#de4968', '#fe9f6d', '#fcfdbf'], domain: [0, 80] },
+  ESI_eq: { label: 'Καταλληλότητα με ίσα βάρη', short: 'Ίσα βάρη', unit: '/100', digits: 0, palette: ['#1b1036', '#3b0f70', '#8c2981', '#de4968', '#fe9f6d', '#fcfdbf'], domain: [0, 80] },
   T2M: { label: 'Θερμοκρασία αέρα (T2M)', short: 'Θερμοκρασία', unit: '°C', digits: 1, palette: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'] },
   PRECIP: { label: 'Βροχόπτωση (PRECTOTCORR)', short: 'Βροχή', unit: 'mm', digits: 0, palette: ['#3b2a14', '#8c6d31', '#d9c27a', '#c7e9b4', '#41b6c4', '#225ea8', '#0c2c84'] },
   RH2M: { label: 'Σχετική υγρασία (RH2M)', short: 'Υγρασία', unit: '%', digits: 0, palette: ['#5c3a12', '#a6611a', '#dfc27d', '#80cdc1', '#018571', '#014636'] },
@@ -35,3 +35,21 @@ export function niceDomain(vals: number[], fixed?: [number, number]): [number, n
 }
 export const esiWord = (x: number | null | undefined) =>
   x === null || x === undefined ? '—' : x >= 60 ? 'Πολύ ευνοϊκές' : x >= 45 ? 'Ευνοϊκές' : x >= 30 ? 'Μέτριες' : x >= 15 ? 'Περιορισμένες' : 'Δυσμενείς'
+
+// "Μάι–Οκτ" style text for a set of months (1–12); separate runs are joined with commas.
+export function monthRange(months: number[]): string {
+  if (!months.length) return 'κανένας μήνας'
+  const s = [...months].sort((a, b) => a - b)
+  const runs: [number, number][] = []
+  for (const m of s) {
+    const last = runs[runs.length - 1]
+    if (last && m === last[1] + 1) last[1] = m
+    else runs.push([m, m])
+  }
+  return runs.map(([a, b]) => (a === b ? MONTHS[a] : `${MONTHS[a]}–${MONTHS[b]}`)).join(', ')
+}
+
+// Where a place stands in Greece, in groups rather than ranks.
+export const pctWord = (p: number | null | undefined) =>
+  p === null || p === undefined ? '—' : p >= 75 ? 'στο πιο ευνοϊκό 25% της Ελλάδας' : p >= 50 ? 'λίγο πάνω από τη μέση της Ελλάδας'
+    : p >= 25 ? 'λίγο κάτω από τη μέση της Ελλάδας' : 'στο λιγότερο ευνοϊκό 25% της Ελλάδας'
